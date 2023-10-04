@@ -6,6 +6,7 @@ Collection of simple scripts to consume object storage APIs and gather metrics.
 - [just](https://just.systems/)
 - [rclone](https://rclone.org/)
 - [openssl](https://www.openssl.org/docs/man1.0.2/man1/openssl.html)
+- [k6](https://github.com/grafana/k6)
 
 ## Usage
 
