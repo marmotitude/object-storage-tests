@@ -16,7 +16,7 @@ rclone config
 ```
 
 And then run the desired test passing the name of your remote.
-The results are uploaded to a bucket on the same remote.
+The results are stored on a `results` folder.
 
 Type `just` to get a list of the available tests.
 See the [justfile](./justfile) to check the default parameters and bucket names used.
@@ -24,4 +24,3 @@ See the [justfile](./justfile) to check the default parameters and bucket names 
 ## License
 
 MIT License (c) 2023 Marmotidude and [AUTHORS](./AUTHORS)
-
