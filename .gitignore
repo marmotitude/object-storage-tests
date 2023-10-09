@@ -1,2 +1,5 @@
 .env
+.remote.*.yml
+!.remote.example.yml
+rclone.conf
 results
