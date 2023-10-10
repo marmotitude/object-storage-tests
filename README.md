@@ -3,6 +3,7 @@ Collection of simple scripts to consume object storage APIs and gather metrics.
 
 ## Toolbox
 
+- [aws-cli](https://aws.amazon.com/cli/)
 - [k6](https://github.com/grafana/k6)
 - [rclone](https://rclone.org/)
 - [just](https://just.systems/)
@@ -10,7 +11,9 @@ Collection of simple scripts to consume object storage APIs and gather metrics.
 - [tee](https://en.wikipedia.org/wiki/Tee_(command))
 - [openssl](https://www.openssl.org/docs/man1.0.2/man1/openssl.html)
 
-## Usage
+## Setup
+
+### rclone
 
 Create an rclone.conf using the command:
 
@@ -19,7 +22,18 @@ rclone config
 ```
 
 NOTE: Open your rclone.conf file and make sure your AWS block contains something similar to
- `endpoint = https://s3.us-east-1.amazonaws.com`
+ `endpoint = https://s3.us-east-1.amazonaws.com` and that all remotes contains a `region = something`
+
+
+### aws-cli
+
+Setup your profile credentials with:
+
+```
+aws configure --profile <profile_name>
+```
+
+## Usage
 
 Run the desired tests using `just`, the reciepe name and pass a remote name as argument.
 
