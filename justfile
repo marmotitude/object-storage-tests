@@ -5,10 +5,13 @@ date := `date +%Y%m%d-%H%M%S`
 time_format := "%E"
 
 # k6
-test_bucket := "test-jslib-aws-"
+k6_test_bucket := "test-jslib-aws-"
 # https://k6.io/docs/get-started/running-k6/#adding-more-vus
 k6_vus := "2"
 k6_iterations := "2"
+
+# aws-cli
+s3api_test_bucket := "test-aws-cli-s3api-"
 
 # rclone
 test_dir := "test-rclone-"
@@ -29,6 +32,10 @@ _default:
 test remote:
  @just _test {{remote}} {{date}} `just _print-unique-name`
 
+# Test a S3-compatible provider with aws-cli
+test-aws-s3api remote:
+  @just _test-aws-s3api {{remote}} {{date}} `just _print-unique-name`
+
 # Test a S3-compatible provider with k6
 test-k6 remote:
   @just _test-k6 {{remote}} {{date}} `just _print-unique-name`
@@ -44,8 +51,58 @@ test-rclone remote:
 _print-unique-name:
   openssl rand -hex 12
 
+_aws-s3api endpoint profile command results_dir *args:
+  aws s3api {{command}} \
+    --endpoint {{endpoint}} \
+    --profile {{profile}} \
+    {{args}} 2>&1 | tee -a {{results_dir}}/s3api_{{command}}.log
+
+__test-aws-s3api remote unique_sufix endpoint results_dir:
+  @just _setup {{remote}}
+  mkdir -p {{results_dir}}
+  # create test bucket
+  @just _aws-s3api {{endpoint}} {{remote}} create-bucket {{results_dir}} \
+    --bucket {{s3api_test_bucket}}{{unique_sufix}} \
+    --debug
+  # list buckets
+  @just _aws-s3api {{endpoint}} {{remote}} list-buckets {{results_dir}} \
+    --debug
+  # put 2 objects
+  @just _aws-s3api {{endpoint}} {{remote}} put-object {{results_dir}} \
+    --bucket {{s3api_test_bucket}}{{unique_sufix}} \
+    --key object_1 \
+    --body LICENSE \
+    --debug
+  @just _aws-s3api {{endpoint}} {{remote}} put-object {{results_dir}} \
+    --bucket {{s3api_test_bucket}}{{unique_sufix}} \
+    --key object_2 \
+    --body README.md \
+    --debug
+  # list objects
+  @just _aws-s3api {{endpoint}} {{remote}} list-objects {{results_dir}} \
+    --bucket {{s3api_test_bucket}}{{unique_sufix}} \
+  # delete objects
+  @just _aws-s3api {{endpoint}} {{remote}} delete-objects {{results_dir}} \
+    --bucket {{s3api_test_bucket}}{{unique_sufix}} \
+    '--delete "{ \"Objects\": [ {\"Key\": \"object_1\"}, {\"Key\": \"object_2\"} ]}"' \
+    --debug
+  # list objects
+  @just _aws-s3api {{endpoint}} {{remote}} list-objects {{results_dir}} \
+    --bucket {{s3api_test_bucket}}{{unique_sufix}} \
+  # delete test bucket
+  @just _aws-s3api {{endpoint}} {{remote}} delete-bucket {{results_dir}} \
+    --bucket {{s3api_test_bucket}}{{unique_sufix}} \
+    --debug
+
+_test-aws-s3api remote timestamp unique_sufix:
+  @just _setup {{remote}}
+  @just __test-aws-s3api {{remote}} {{unique_sufix}} `dasel -f .remote.{{remote}}.yml 'endpoint'` {{results_prefix}}/{{remote}}/{{timestamp}}
+  # remove temp yml
+  rm .remote.{{remote}}.yml
+
+
 # Convert an rclone.conf to a local yml used on k6 tests
-_setup-k6 remote:
+_setup remote:
   # convert an rclone.conf block to yml
   # https://unix.stackexchange.com/a/647369
   printf '%s\n' '?\[{{remote}}\]?+1' '. +1,/^$/ -1 p' | ed -s {{rclone_conf}} | sed 's/ =/:/g' \
@@ -54,10 +111,11 @@ _setup-k6 remote:
 _test remote timestamp unique_sufix:
   @just _test-k6 {{remote}} {{timestamp}} {{unique_sufix}}
   @just _test-rclone {{remote}} {{timestamp}} {{unique_sufix}}
+  @just _test-aws-s3api {{remote}} {{timestamp}} {{unique_sufix}}
 
 # run k6 test with env vars
 _k6-run remote testname bucket_name results_dir:
-  @just _setup-k6 {{remote}}
+  @just _setup {{remote}}
   k6 run src/k6/{{testname}}.js \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --out json={{results_dir}}/k6-{{testname}}.json \
@@ -68,17 +126,17 @@ _k6-run remote testname bucket_name results_dir:
     --env S3_REGION=`dasel -f .remote.{{remote}}.yml 'region'` \
   | tee {{results_dir}}/k6-{{testname}}.log
   # remove temp yml
-  # rm .remote.{{remote}}.yml
+  rm .remote.{{remote}}.yml
 
 __test-k6 remote unique_sufix results_dir:
   # create local folder for storing results
   mkdir -p {{results_dir}}
   # TODO: remove this mkdir once k6 is able to create buckets
   #       see: https://github.com/grafana/k6-jslib-aws/issues/69
-  rclone mkdir {{remote}}:{{test_bucket}}{{unique_sufix}}
-  @just _k6-run {{remote}} buckets {{test_bucket}}{{unique_sufix}} {{results_dir}}
+  rclone mkdir {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
+  @just _k6-run {{remote}} buckets {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
   # TODO: remove this purge once k6 is able to delete buckets
-  rclone purge {{remote}}:{{test_bucket}}{{unique_sufix}}
+  rclone purge {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
 
 _test-k6 remote timestamp unique_sufix:
   @just __test-k6 {{remote}} {{unique_sufix}} {{results_prefix}}/{{remote}}/{{timestamp}}
