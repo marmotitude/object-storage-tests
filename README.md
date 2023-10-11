@@ -5,6 +5,7 @@ Collection of simple scripts to consume object storage APIs and gather metrics.
 
 - [aws-cli](https://aws.amazon.com/cli/)
 - [k6](https://github.com/grafana/k6)
+  - with [xk6-exec](https://github.com/grafana/xk6-exec) extension
 - [rclone](https://rclone.org/)
 - [just](https://just.systems/)
 - [dasel](https://github.com/TomWright/dasel)
@@ -12,6 +13,16 @@ Collection of simple scripts to consume object storage APIs and gather metrics.
 - [openssl](https://www.openssl.org/docs/man1.0.2/man1/openssl.html)
 
 ## Setup
+
+### bundle xk6-exec extension on k6
+
+```
+# generate new binary
+docker run --rm -it -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" grafana/xk6 build v0.43.1 --with github.com/grafana/xk6-exec@v0.3.0
+
+# overwrite existing k6 with the new one
+sudo cp -f ./k6 `which k6`
+```
 
 ### rclone
 
