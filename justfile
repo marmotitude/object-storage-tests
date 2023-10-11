@@ -135,6 +135,7 @@ __test-k6 remote unique_sufix results_dir:
   #       see: https://github.com/grafana/k6-jslib-aws/issues/69
   rclone mkdir {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
   @just _k6-run {{remote}} buckets {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
+  @just _k6-run {{remote}} objects {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
   # TODO: remove this purge once k6 is able to delete buckets
   rclone purge {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
 
