@@ -119,6 +119,7 @@ _k6-run remote testname bucket_name results_dir:
   k6 run src/k6/{{testname}}.js \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --out json={{results_dir}}/k6-{{testname}}.json \
+    --env AWS_CLI_PROFILE={{remote}} \
     --env S3_TEST_BUCKET_NAME={{bucket_name}} \
     --env S3_ACCESS_KEY_ID=`dasel -f .remote.{{remote}}.yml 'access_key_id'` \
     --env S3_SECRET_ACCESS_KEY=`dasel -f .remote.{{remote}}.yml 'secret_access_key'` \
@@ -131,6 +132,7 @@ _k6-run remote testname bucket_name results_dir:
 __test-k6 remote unique_sufix results_dir:
   # create local folder for storing results
   mkdir -p {{results_dir}}
+  @just _k6-run {{remote}} aws-cli-objects {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
   # TODO: remove this mkdir once k6 is able to create buckets
   #       see: https://github.com/grafana/k6-jslib-aws/issues/69
   rclone mkdir {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
