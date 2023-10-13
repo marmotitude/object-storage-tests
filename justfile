@@ -1,6 +1,5 @@
 ### Setup
 set dotenv-load
-
 date := `date +%Y%m%d-%H%M%S`
 time_format := "%E"
 
@@ -22,30 +21,71 @@ rclone_files_count := "50"
 rclone_files_per_directory := "5"
 
 
+
 ### Public Recipes
 
 # List available recipes
 _default:
-  @just --list
+  @just --list --unsorted
 
-# Run all tests
-test remote:
- @just _test {{remote}} {{date}} `just _print-unique-name`
-
-# Test a S3-compatible provider with aws-cli
-test-aws-s3api remote:
-  @just _test-aws-s3api {{remote}} {{date}} `just _print-unique-name`
+# Check dependencies
+check-tools:
+  k6 version
+  aws --version
+  rclone --version | head -n1
+  openssl version
+  dasel --version
+  tee --version | head -n1
 
 # Test a S3-compatible provider with k6
-test-k6 remote:
+test remote:
   @just _test-k6 {{remote}} {{date}} `just _print-unique-name`
 
-# Test a S3-compatible provider with rclone
-test-rclone remote:
+# Enter distrobox
+dev:
+  distrobox enter -a "--env EDITOR=/usr/bin/vim" devshell-obj
+
+# Build dev-shell image and assemble distrobox
+build-dev:
+  podman build -t docker.io/fczuardi/object-storage-tests:devshell -f ./devshell.Dockerfile
+  SHELL=/bin/fish distrobox assemble create
+
+# Build main docker image
+build :
+  podman build -t docker.io/fczuardi/object-storage-tests:latest -f ./Dockerfile
+
+# Run main docker image
+run *args:
+  podman run object-storage-tests {{args}}
+
+
+
+### To be Deprecated Recipes
+
+# (legacy) Run all tests
+_legacy-test remote:
+ @just _test {{remote}} {{date}} `just _print-unique-name`
+
+# (legacy) Test a S3-compatible provider with aws-cli
+_legacy-test-aws-s3api remote:
+  @just _test-aws-s3api {{remote}} {{date}} `just _print-unique-name`
+
+# (legacy) Test a S3-compatible provider with rclone
+_legacy-test-rclone remote:
   @just _test-rclone {{remote}} {{date}} `just _print-unique-name`
 
 
+
 ### Private recipes
+
+# Check devshell tools
+_check-dev-tools:
+  ssh -V
+  git --version
+  vim --version | head -n1
+  groff --version | head -n1
+  bat --version
+  rg --version | head -n1
 
 # prints a random string
 _print-unique-name:
