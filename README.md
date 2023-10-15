@@ -11,7 +11,7 @@ the open source k6 module [k6-jslib-aws](https://github.com/grafana/k6-jslib-aws
 ### Roadmap
 This is an early-stage project and the main focus is to test S3-compatible providers,
 like AWS and Digital Ocean. But other object storage open source servers, like MinIO
-and OpenStack Swift are planned, so tests using the 
+and OpenStack Swift are planned, so tests using the
 [swift-cli](https://docs.openstack.org/ocata/cli-reference/swift.html) and
 [mc](https://min.io/docs/minio/linux/reference/minio-mc.html) tools are in the roadmap.
 
@@ -20,8 +20,8 @@ descriptions might be mixed in Portuguese and English.
 
 ## Usage
 
-This tool is available as a [docker image](https://hub.docker.com/r/fczuardi/object-storage-tests), 
-to run the tests against your object-storage servers, copy the [example.config.toml](./example.config.toml) to `config.toml`
+This tool is available as a [docker image](https://hub.docker.com/r/fczuardi/object-storage-tests),
+to run the tests against your object-storage servers, copy the [example.config.yaml](./example.config.yaml) to `config.yaml`
 and run:
 
 ```
