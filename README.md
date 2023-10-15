@@ -29,7 +29,7 @@ This tool was only tested on **Linux** machines with
 
 **object-storage-tests** is available as two [docker images](https://hub.docker.com/r/fczuardi/object-storage-tests):
   - tag `latest` is the main test suite with commands and requirements to run it.
-  - tag `devshell` is a shell for developer tools use it interactively and make contributions.
+  - tag `devshell` is a shell for developer to use it interactively and make contributions.
 
 To run the test against a S3-compatible provider (we call them "remotes"), first
 copy the [example.config.yaml](./example.config.yaml) to `config.yaml` and edit it to
