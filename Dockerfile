@@ -16,4 +16,5 @@ COPY --from=gotplbuilder /app/gotpl /usr/bin/gotpl
 WORKDIR /app
 COPY src /app/src
 COPY justfile /app/justfile
+RUN mkdir /app/config
 ENTRYPOINT ["just", "-f", "/app/justfile"]
