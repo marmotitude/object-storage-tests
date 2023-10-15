@@ -1,6 +1,7 @@
 # Globals used in recipes
 #------------------------
 date := `date +%Y%m%d-%H%M%S`
+config_file := env_var_or_default("CONFIG_PATH", "./") + "config.yaml"
 rclone_conf_exists := path_exists(env_var("HOME") + "/.config/rclone")
 aws_conf_exists := path_exists(env_var("HOME") + "/.aws")
 
@@ -42,7 +43,12 @@ build :
 
 # Run main docker image
 run *args:
-  podman run object-storage-tests {{args}}
+  mkdir -p results
+  podman run \
+    --volume ./results:/app/results:Z \
+    --volume .:/app/config:Z \
+    --env "CONFIG_PATH=/app/config/" \
+    object-storage-tests {{args}}
 
 # Build dev-shell image and assemble distrobox
 build-dev:
@@ -72,7 +78,7 @@ _setup-rclone:
 __setup-rclone:
   @echo "writing ~/.config/rclone/rclone.conf…"
   @mkdir -p ~/.config/rclone
-  gotpl src/templates/rclone.conf -f config.yaml -o ~/.config/rclone
+  gotpl src/templates/rclone.conf -f {{config_file}} -o ~/.config/rclone
 
 # write local ~/.aws
 _setup-aws:
@@ -80,8 +86,8 @@ _setup-aws:
 __setup-aws:
   @echo "writing ~/.aws…"
   @mkdir -p ~/.aws
-  gotpl src/templates/aws/config -f config.yaml -o ~/.aws
-  gotpl src/templates/aws/credentials -f config.yaml -o ~/.aws
+  gotpl src/templates/aws/config -f {{config_file}} -o ~/.aws
+  gotpl src/templates/aws/credentials -f {{config_file}} -o ~/.aws
 
 # setup cli tools
 _setup: _setup-rclone _setup-aws
@@ -96,10 +102,10 @@ _k6-run remote testname results_dir *args:
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --out json={{results_dir}}/k6-{{testname}}.json \
     --env AWS_CLI_PROFILE={{remote}} \
-    --env S3_ACCESS_KEY_ID=`dasel -f config.yaml -s remotes.{{remote}}.access_key` \
-    --env S3_SECRET_ACCESS_KEY=`dasel -f config.yaml -s .remotes.{{remote}}.secret_key` \
-    --env S3_ENDPOINT=`dasel -f config.yaml -s remotes.{{remote}}.endpoint` \
-    --env S3_REGION=`dasel -f config.yaml -s remotes.{{remote}}.region` \
+    --env S3_ACCESS_KEY_ID=`dasel -f {{config_file}} -s remotes.{{remote}}.access_key` \
+    --env S3_SECRET_ACCESS_KEY=`dasel -f {{config_file}} -s .remotes.{{remote}}.secret_key` \
+    --env S3_ENDPOINT=`dasel -f {{config_file}} -s remotes.{{remote}}.endpoint` \
+    --env S3_REGION=`dasel -f {{config_file}} -s remotes.{{remote}}.region` \
     {{args}} | tee {{results_dir}}/k6-{{testname}}.log
 
 # TODO remove this bucket_name argument when k6-jslib-aws is able to create buckets 
@@ -204,7 +210,7 @@ __test-aws-s3api remote unique_sufix endpoint results_dir:
     --debug
 
 _test-aws-s3api remote timestamp unique_sufix:
-  @just __test-aws-s3api {{remote}} {{unique_sufix}} `dasel -f config.yaml -s remotes.{{remote}}.endpoint` {{results_prefix}}/{{remote}}/{{timestamp}}
+  @just __test-aws-s3api {{remote}} {{unique_sufix}} `dasel -f {{config_file}} -s remotes.{{remote}}.endpoint` {{results_prefix}}/{{remote}}/{{timestamp}}
 
 
 _test remote timestamp unique_sufix:
