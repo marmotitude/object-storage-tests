@@ -1,0 +1,5 @@
+{{range $remote_name, $remote := .remotes}}
+[profile {{$remote_name }}]
+
+{{end}}
+

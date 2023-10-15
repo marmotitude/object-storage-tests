@@ -1,6 +1,7 @@
-config.toml
+config.yaml
+rclone.conf
+!src/templates/rclone.conf
 .env
 .remote.*.yml
 !.remote.example.yml
-rclone.conf
 results

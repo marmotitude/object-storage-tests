@@ -2,6 +2,9 @@
 set dotenv-load
 date := `date +%Y%m%d-%H%M%S`
 time_format := "%E"
+rclone_conf_exists := path_exists(env_var("HOME") + "/.config/rclone")
+aws_conf_exists := path_exists(env_var("HOME") + "/.aws")
+
 
 # k6
 k6_test_bucket := "test-jslib-aws-"
@@ -34,11 +37,17 @@ check-tools:
   aws --version
   rclone --version | head -n1
   openssl version
+  gotpl version | head -n1
   dasel --version
   tee --version | head -n1
 
+# List configured remotes
+list-remotes: _setup-rclone _setup-aws
+  rclone listremotes
+  aws configure list-profiles
+
 # Test a S3-compatible provider with k6
-test remote:
+test remote: _setup-rclone _setup-aws
   @just _test-k6 {{remote}} {{date}} `just _print-unique-name`
 
 # Enter distrobox
@@ -87,9 +96,55 @@ _check-dev-tools:
   bat --version
   rg --version | head -n1
 
+# write local rclone.conf
+_setup-rclone:
+  {{ if rclone_conf_exists == "false" { "just __setup-rclone" } else { "" } }}
+__setup-rclone:
+  @echo "writing ~/.config/rclone/rclone.conf…"
+  @mkdir -p ~/.config/rclone
+  gotpl src/templates/rclone.conf -f config.yaml -o ~/.config/rclone
+
+# write local ~/.aws
+_setup-aws:
+  {{ if aws_conf_exists == "false" { "just __setup-aws" } else { "" } }}
+__setup-aws:
+  @echo "writing ~/.aws…"
+  @mkdir -p ~/.aws
+  gotpl src/templates/aws/config -f config.yaml -o ~/.aws
+  gotpl src/templates/aws/credentials -f config.yaml -o ~/.aws
+
 # prints a random string
 _print-unique-name:
   openssl rand -hex 12
+
+# run k6 test with env vars
+_k6-run remote testname bucket_name results_dir:
+  k6 run src/k6/{{testname}}.js \
+    --vus={{k6_vus}} --iterations={{k6_iterations}} \
+    --out json={{results_dir}}/k6-{{testname}}.json \
+    --env AWS_CLI_PROFILE={{remote}} \
+    --env S3_TEST_BUCKET_NAME={{bucket_name}} \
+    --env S3_ACCESS_KEY_ID=`dasel -f config.yaml -s remotes.{{remote}}.access_key` \
+    --env S3_SECRET_ACCESS_KEY=`dasel -f config.yaml -s .remotes.{{remote}}.secret_key` \
+    --env S3_ENDPOINT=`dasel -f config.yaml -s remotes.{{remote}}.endpoint` \
+    --env S3_REGION=`dasel -f config.yaml -s remotes.{{remote}}.region` \
+  | tee {{results_dir}}/k6-{{testname}}.log
+
+__test-k6 remote unique_sufix results_dir:
+  # create local folder for storing results
+  mkdir -p {{results_dir}}
+  @just _k6-run {{remote}} aws-cli-objects {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
+  # TODO: remove this mkdir once k6 is able to create buckets
+  #       see: https://github.com/grafana/k6-jslib-aws/issues/69
+  rclone mkdir {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
+  @just _k6-run {{remote}} buckets {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
+  @just _k6-run {{remote}} objects {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
+  # TODO: remove this purge once k6 is able to delete buckets
+  rclone purge {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
+
+_test-k6 remote timestamp unique_sufix:
+  @just __test-k6 {{remote}} {{unique_sufix}} {{results_prefix}}/{{remote}}/{{timestamp}}
+
 
 _aws-s3api endpoint profile command results_dir *args:
   aws s3api {{command}} \
@@ -152,37 +207,6 @@ _test remote timestamp unique_sufix:
   @just _test-k6 {{remote}} {{timestamp}} {{unique_sufix}}
   @just _test-rclone {{remote}} {{timestamp}} {{unique_sufix}}
   @just _test-aws-s3api {{remote}} {{timestamp}} {{unique_sufix}}
-
-# run k6 test with env vars
-_k6-run remote testname bucket_name results_dir:
-  @just _setup {{remote}}
-  k6 run src/k6/{{testname}}.js \
-    --vus={{k6_vus}} --iterations={{k6_iterations}} \
-    --out json={{results_dir}}/k6-{{testname}}.json \
-    --env AWS_CLI_PROFILE={{remote}} \
-    --env S3_TEST_BUCKET_NAME={{bucket_name}} \
-    --env S3_ACCESS_KEY_ID=`dasel -f .remote.{{remote}}.yml 'access_key_id'` \
-    --env S3_SECRET_ACCESS_KEY=`dasel -f .remote.{{remote}}.yml 'secret_access_key'` \
-    --env S3_ENDPOINT=`dasel -f .remote.{{remote}}.yml 'endpoint'` \
-    --env S3_REGION=`dasel -f .remote.{{remote}}.yml 'region'` \
-  | tee {{results_dir}}/k6-{{testname}}.log
-  # remove temp yml
-  rm .remote.{{remote}}.yml
-
-__test-k6 remote unique_sufix results_dir:
-  # create local folder for storing results
-  mkdir -p {{results_dir}}
-  @just _k6-run {{remote}} aws-cli-objects {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
-  # TODO: remove this mkdir once k6 is able to create buckets
-  #       see: https://github.com/grafana/k6-jslib-aws/issues/69
-  rclone mkdir {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
-  @just _k6-run {{remote}} buckets {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
-  @just _k6-run {{remote}} objects {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
-  # TODO: remove this purge once k6 is able to delete buckets
-  rclone purge {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
-
-_test-k6 remote timestamp unique_sufix:
-  @just __test-k6 {{remote}} {{unique_sufix}} {{results_prefix}}/{{remote}}/{{timestamp}}
 
 __test-rclone remote unique_sufix results_dir:
   # create local directory for results and logs
