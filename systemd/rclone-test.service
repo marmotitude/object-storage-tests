@@ -4,6 +4,6 @@ Description=Run rclone tests against 2 different remotes
 [Service]
 User=ubuntu
 WorkingDirectory=/home/ubuntu/object-storage-tests
-ExecStart=/usr/bin/just _legacy-test aws
-ExecStartPost=/usr/bin/just _legacy-test aws2
+ExecStart=/usr/bin/just test aws-east-1
+ExecStartPost=/usr/bin/just test do-nyc3
 Type=oneshot
