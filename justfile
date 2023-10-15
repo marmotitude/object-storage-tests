@@ -1,31 +1,17 @@
-### Setup
-set dotenv-load
+# Globals used in recipes
+#------------------------
 date := `date +%Y%m%d-%H%M%S`
-time_format := "%E"
 rclone_conf_exists := path_exists(env_var("HOME") + "/.config/rclone")
 aws_conf_exists := path_exists(env_var("HOME") + "/.aws")
 
-
 # k6
-k6_test_bucket := "test-jslib-aws-"
 # https://k6.io/docs/get-started/running-k6/#adding-more-vus
 k6_vus := "2"
 k6_iterations := "2"
 
-# aws-cli
-s3api_test_bucket := "test-aws-cli-s3api-"
 
-# rclone
-test_dir := "test-rclone-"
-results_prefix := "results"
-rclone_conf := "~/.config/rclone/rclone.conf"
-# https://rclone.org/commands/rclone_test_makefiles/
-rclone_files_count := "50"
-rclone_files_per_directory := "5"
-
-
-
-### Public Recipes
+# Public Recipes
+#---------------
 
 # List available recipes
 _default:
@@ -42,22 +28,13 @@ check-tools:
   tee --version | head -n1
 
 # List configured remotes
-list-remotes: _setup-rclone _setup-aws
+list-remotes: _setup
   rclone listremotes
   aws configure list-profiles
 
 # Test a S3-compatible provider with k6
 test remote: _setup-rclone _setup-aws
   @just _test-k6 {{remote}} {{date}} `just _print-unique-name`
-
-# Enter distrobox
-dev:
-  distrobox enter -a "--env EDITOR=/usr/bin/vim" devshell-obj
-
-# Build dev-shell image and assemble distrobox
-build-dev:
-  podman build -t docker.io/fczuardi/object-storage-tests:devshell -f ./devshell.Dockerfile
-  SHELL=/bin/fish distrobox assemble create
 
 # Build main docker image
 build :
@@ -67,25 +44,18 @@ build :
 run *args:
   podman run object-storage-tests {{args}}
 
+# Build dev-shell image and assemble distrobox
+build-dev:
+  podman build -t docker.io/fczuardi/object-storage-tests:devshell -f ./devshell.Dockerfile
+  SHELL=/bin/fish distrobox assemble create
+
+# Enter dev-shell
+dev:
+  distrobox enter -a "--env EDITOR=/usr/bin/vim" devshell-obj
 
 
-### To be Deprecated Recipes
-
-# (legacy) Run all tests
-_legacy-test remote:
- @just _test {{remote}} {{date}} `just _print-unique-name`
-
-# (legacy) Test a S3-compatible provider with aws-cli
-_legacy-test-aws-s3api remote:
-  @just _test-aws-s3api {{remote}} {{date}} `just _print-unique-name`
-
-# (legacy) Test a S3-compatible provider with rclone
-_legacy-test-rclone remote:
-  @just _test-rclone {{remote}} {{date}} `just _print-unique-name`
-
-
-
-### Private recipes
+# Private recipes
+#----------------
 
 # Check devshell tools
 _check-dev-tools:
@@ -113,38 +83,83 @@ __setup-aws:
   gotpl src/templates/aws/config -f config.yaml -o ~/.aws
   gotpl src/templates/aws/credentials -f config.yaml -o ~/.aws
 
+# setup cli tools
+_setup: _setup-rclone _setup-aws
+
 # prints a random string
 _print-unique-name:
   openssl rand -hex 12
 
 # run k6 test with env vars
-_k6-run remote testname bucket_name results_dir:
+_k6-run remote testname results_dir *args:
   k6 run src/k6/{{testname}}.js \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --out json={{results_dir}}/k6-{{testname}}.json \
     --env AWS_CLI_PROFILE={{remote}} \
-    --env S3_TEST_BUCKET_NAME={{bucket_name}} \
     --env S3_ACCESS_KEY_ID=`dasel -f config.yaml -s remotes.{{remote}}.access_key` \
     --env S3_SECRET_ACCESS_KEY=`dasel -f config.yaml -s .remotes.{{remote}}.secret_key` \
     --env S3_ENDPOINT=`dasel -f config.yaml -s remotes.{{remote}}.endpoint` \
     --env S3_REGION=`dasel -f config.yaml -s remotes.{{remote}}.region` \
-  | tee {{results_dir}}/k6-{{testname}}.log
+    {{args}} | tee {{results_dir}}/k6-{{testname}}.log
 
+# TODO remove this bucket_name argument when k6-jslib-aws is able to create buckets 
+#       see: https://github.com/grafana/k6-jslib-aws/issues/69
+k6_test_bucket := "test-jslib-aws-"
 __test-k6 remote unique_sufix results_dir:
   # create local folder for storing results
   mkdir -p {{results_dir}}
-  @just _k6-run {{remote}} aws-cli-objects {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
+  @just _k6-run {{remote}} aws-cli-objects {{results_dir}}
   # TODO: remove this mkdir once k6 is able to create buckets
-  #       see: https://github.com/grafana/k6-jslib-aws/issues/69
   rclone mkdir {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
-  @just _k6-run {{remote}} buckets {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
-  @just _k6-run {{remote}} objects {{k6_test_bucket}}{{unique_sufix}} {{results_dir}}
+  # TODO: remove this env once k6 is able to create buckets
+  @just _k6-run {{remote}} buckets {{results_dir}} --env S3_TEST_BUCKET_NAME={{k6_test_bucket}}{{unique_sufix}}
+  # TODO: remove this env once k6 is able to create buckets
+  @just _k6-run {{remote}} objects {{results_dir}} --env S3_TEST_BUCKET_NAME={{k6_test_bucket}}{{unique_sufix}}
   # TODO: remove this purge once k6 is able to delete buckets
   rclone purge {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
 
 _test-k6 remote timestamp unique_sufix:
   @just __test-k6 {{remote}} {{unique_sufix}} {{results_prefix}}/{{remote}}/{{timestamp}}
 
+
+#------------------
+# TO BE DEPRECATED
+#------------------
+
+# Globals used in legacy recipes
+#-----------------------------------
+time_format := "%E"
+
+# aws-cli
+s3api_test_bucket := "test-aws-cli-s3api-"
+
+# rclone
+test_dir := "test-rclone-"
+results_prefix := "results"
+rclone_conf := "~/.config/rclone/rclone.conf"
+# https://rclone.org/commands/rclone_test_makefiles/
+rclone_files_count := "50"
+
+
+# To be Deprecated Recipes
+#-------------------------
+
+# (legacy) Run all tests
+legacy-test remote: _setup
+ @just _test {{remote}} {{date}} `just _print-unique-name`
+
+# (legacy) Test a S3-compatible provider with aws-cli
+legacy-test-aws-s3api remote: _setup-aws
+  @just _test-aws-s3api {{remote}} {{date}} `just _print-unique-name`
+
+# (legacy) Test a S3-compatible provider with rclone
+legacy-test-rclone remote: _setup-rclone
+  @just _test-rclone {{remote}} {{date}} `just _print-unique-name`
+rclone_files_per_directory := "5"
+
+
+# To be deprecated private recipes
+#---------------------------------
 
 _aws-s3api endpoint profile command results_dir *args:
   aws s3api {{command}} \
@@ -153,7 +168,6 @@ _aws-s3api endpoint profile command results_dir *args:
     {{args}} 2>&1 | tee -a {{results_dir}}/s3api_{{command}}.log
 
 __test-aws-s3api remote unique_sufix endpoint results_dir:
-  @just _setup {{remote}}
   mkdir -p {{results_dir}}
   # create test bucket
   @just _aws-s3api {{endpoint}} {{remote}} create-bucket {{results_dir}} \
@@ -190,21 +204,10 @@ __test-aws-s3api remote unique_sufix endpoint results_dir:
     --debug
 
 _test-aws-s3api remote timestamp unique_sufix:
-  @just _setup {{remote}}
-  @just __test-aws-s3api {{remote}} {{unique_sufix}} `dasel -f .remote.{{remote}}.yml 'endpoint'` {{results_prefix}}/{{remote}}/{{timestamp}}
-  # remove temp yml
-  rm .remote.{{remote}}.yml
+  @just __test-aws-s3api {{remote}} {{unique_sufix}} `dasel -f config.yaml -s remotes.{{remote}}.endpoint` {{results_prefix}}/{{remote}}/{{timestamp}}
 
-
-# Convert an rclone.conf to a local yml used on k6 tests
-_setup remote:
-  # convert an rclone.conf block to yml
-  # https://unix.stackexchange.com/a/647369
-  printf '%s\n' '?\[{{remote}}\]?+1' '. +1,/^$/ -1 p' | ed -s {{rclone_conf}} | sed 's/ =/:/g' \
-    > .remote.{{remote}}.yml
 
 _test remote timestamp unique_sufix:
-  @just _test-k6 {{remote}} {{timestamp}} {{unique_sufix}}
   @just _test-rclone {{remote}} {{timestamp}} {{unique_sufix}}
   @just _test-aws-s3api {{remote}} {{timestamp}} {{unique_sufix}}
 
@@ -237,4 +240,3 @@ __test-rclone remote unique_sufix results_dir:
 
 _test-rclone remote timestamp unique_sufix:
   @just __test-rclone {{remote}} {{unique_sufix}} {{results_prefix}}/{{remote}}/{{timestamp}}
-
