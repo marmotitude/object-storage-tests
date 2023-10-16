@@ -37,9 +37,9 @@ list-remotes: _setup
 test remote: _setup-rclone _setup-aws
   @just _test-k6 {{remote}} {{date}} `just _print-unique-name`
 
-# Build main docker image
-build :
-  podman build -t docker.io/fczuardi/object-storage-tests:latest -f ./Dockerfile
+# Build main docker image. Builder can be docker or podman.
+build builder="docker":
+  {{builder}} build -t docker.io/fczuardi/object-storage-tests:latest -f ./Dockerfile .
 
 # Run main docker image
 run *args:
@@ -50,9 +50,9 @@ run *args:
     --env "CONFIG_PATH=/app/config/" \
     object-storage-tests {{args}}
 
-# Build dev-shell image and assemble distrobox
-build-dev:
-  podman build -t docker.io/fczuardi/object-storage-tests:devshell -f ./devshell.Dockerfile
+# Build dev-shell image and assemble distrobox. Builder can be docker or podman.
+build-dev builder="docker":
+  {{builder}} build -t docker.io/fczuardi/object-storage-tests:devshell -f ./devshell.Dockerfile .
   SHELL=/bin/fish distrobox assemble create
 
 # Enter dev-shell
