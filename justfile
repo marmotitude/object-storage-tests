@@ -23,6 +23,7 @@ check-tools:
   k6 version
   aws --version
   rclone --version | head -n1
+  swift --version
   openssl version
   gotpl version | head -n1
   dasel --version
