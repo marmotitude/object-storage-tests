@@ -1,7 +1,9 @@
-# k6 with xk6-exec
-FROM grafana/xk6:latest as k6builder
+# k6 with extensions: xk6-exec, xk6-file
+FROM grafana/xk6:0.9.2 as k6builder
 WORKDIR /app
-RUN xk6 build v0.43.1 --with github.com/grafana/xk6-exec@v0.3.0
+RUN xk6 build v0.43.1 \
+      --with github.com/grafana/xk6-exec@v0.3.0 \
+      --with github.com/avitalique/xk6-file@v1.4.0
 
 # gotpl
 FROM alpine:3 as gotplbuilder
@@ -11,8 +13,8 @@ RUN cp linux-amd64/gotpl /app
 
 FROM alpine:3
 RUN apk add coreutils aws-cli rclone just openssl dasel
-COPY --from=k6builder /app/k6 /usr/bin/k6
 COPY --from=gotplbuilder /app/gotpl /usr/bin/gotpl
+COPY --from=k6builder /app/k6 /usr/bin/k6
 WORKDIR /app
 COPY src /app/src
 COPY justfile /app/justfile
