@@ -3,10 +3,10 @@ A growing test suite for S3-like object storage implementations.
 
 ## About
 This project uses the load tests framework [k6][k6] (extended
-with the [xk6-exec][k6-exec] extension) as the basis
-to execute test scenarios using popular open source command line tools
-like [aws-cli][aws-cli], [rclone][rclone], as well as
-the open source k6 module [k6-jslib-aws][k6-jslib-aws].
+with the [xk6-exec][k6-exec] and [xk6-file][xk6-file] extensions)
+as the basis to execute test scenarios using popular open source
+command line tools like [aws-cli][aws-cli], [rclone][rclone],
+as well as the open source k6 module [k6-jslib-aws][k6-jslib-aws].
 
 ### Roadmap
 This is an early-stage project and the main focus is to test proprietary
@@ -79,7 +79,7 @@ tools like a code editor and a nice shell, to know more about this dev image see
 But you dont have to use it, feel free to install the tools used by this project:
 - [gotpl][gotpl]
 - [dasel][dasel]
-- [k6][k6] + [xk6-exec][xk6-exec]
+- [k6][k6] + [xk6-exec][xk6-exec] + [xk6-file][xk6-file]
 - [aws-cli][aws-cli]
 - [rclone][rclone]
   
@@ -100,6 +100,7 @@ Check [Dockerfile][Dockerfile] for an up-to-date complete list.
 [dasel]:https://github.com/TomWright/dasel
 [k6]:https://github.com/grafana/k6
 [xk6-exec]:https://github.com/grafana/xk6-exec
+[xk6-file]:https://github.com/avitalique/xk6-file
 [k6-jslib-aws]:https://github.com/grafana/k6-jslib-aws
 [aws-cli]:https://aws.amazon.com/cli/
 [rclone]:https://rclone.org/
