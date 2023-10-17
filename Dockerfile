@@ -21,8 +21,9 @@ COPY --from=gotplbuilder /app/gotpl /usr/bin/gotpl
 
 # Install swift-cli
 ENV PIP_ROOT_USER_ACTION=ignore
-RUN apk add python3 py3-pip
+RUN apk add python3 py3-pip py3-netifaces
 RUN pip install python-swiftclient
+RUN pip install python-keystoneclient
 
 WORKDIR /app
 COPY src /app/src
