@@ -1,5 +1,6 @@
 {{range $remote_name, $remote := .remotes}}
+  {{ if eq $remote.type "s3" }}
 [profile {{$remote_name }}]
-
+  {{end}}
 {{end}}
 

@@ -1,11 +1,18 @@
 remotes:
   aws-east-1:
+    type: s3
     endpoint: https://us-east-1.amazonaws.com
     region: us-east-1
     access_key: ""
     secret_key: ""
   do-nyc3:
+    type: s3
     endpoint: https://nyc3.digitaloceanspaces.com
     region: nyc3
     access_key: ""
     secret_key: ""
+  local-swift:
+    type: swift
+    user: test:tester
+    key: testing
+    auth: http://127.0.0.1:38001/auth/v1.0
