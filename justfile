@@ -101,13 +101,14 @@ _k6-run remote testname results_dir *args:
   k6 run src/k6/{{testname}}.js \
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
-    --out json={{results_dir}}/k6-{{testname}}.json \
     --env AWS_CLI_PROFILE={{remote}} \
     --env S3_ACCESS_KEY_ID=`dasel -f {{config_file}} -s remotes.{{remote}}.access_key` \
     --env S3_SECRET_ACCESS_KEY=`dasel -f {{config_file}} -s .remotes.{{remote}}.secret_key` \
     --env S3_ENDPOINT=`dasel -f {{config_file}} -s remotes.{{remote}}.endpoint` \
     --env S3_REGION=`dasel -f {{config_file}} -s remotes.{{remote}}.region` \
-    {{args}} 2>&1 | tee {{results_dir}}/k6-{{testname}}.log
+    --out json="{{results_dir}}/k6-{{testname}}.json" \
+    --console-output="{{results_dir}}/k6-{{testname}}.console.log" \
+    {{args}} 2>&1 | tee "{{results_dir}}/k6-{{testname}}.log"
 
 # TODO remove this bucket_name argument when k6-jslib-aws is able to create buckets 
 #       see: https://github.com/grafana/k6-jslib-aws/issues/69
