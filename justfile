@@ -53,7 +53,7 @@ run *args:
 # Build dev-shell image and assemble distrobox. Builder can be docker or podman.
 build-dev builder="docker":
   {{builder}} build -t docker.io/fczuardi/object-storage-tests:devshell -f ./devshell.Dockerfile .
-  SHELL=/bin/fish distrobox assemble create
+  SHELL=/usr/bin/fish distrobox assemble create
 
 # Enter dev-shell
 dev:
