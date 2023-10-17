@@ -1,6 +1,7 @@
 import exec from 'k6/x/exec';
 import { check, fail } from 'k6'
 import { crypto } from "k6/experimental/webcrypto"
+import { parse, checkParts, generateMultipartFiles, removeMultipartFiles } from './utils.js'
 
 const profileName = __ENV.AWS_CLI_PROFILE
 const endpoint = __ENV.S3_ENDPOINT
@@ -24,12 +25,23 @@ export function setup() {
 }
 
 export function teardown({bucketName}) {
+  // list objects
+  let stdOut = s3api("list-objects", bucketName, [])
+  let contents = parse(stdOut).Contents
+  let objects = contents.map(o => {
+    return {"Key": o.Key}
+  })
+  // delete objects
+  stdOut = s3api("delete-objects", bucketName, [
+    "--delete", JSON.stringify({Objects: objects})
+  ])
   // delete bucket used by the tests
   console.log(s3api("delete-bucket", bucketName, []))
 }
 
 export default function scenarios(data) {
   createMultipartUpload(data)
+  completeMultipartUpload(data)
 }
 
 export function createMultipartUpload({bucketName}){
@@ -40,13 +52,7 @@ export function createMultipartUpload({bucketName}){
     "--key", keyName
   ])
   console.info("Create Output", stdOut)
-  let parsedResult;
-  try {
-    parsedResult = JSON.parse(stdOut)
-  } catch(e) {
-    console.error(e)
-    fail('Unparseable create-multipart-upload response')
-  }
+  let parsedResult = parse(stdOut)
   const uploadId = parsedResult.UploadId 
   check(uploadId, {
     'CLI returns a response with UploadId': id => id !== undefined,
@@ -60,8 +66,6 @@ export function createMultipartUpload({bucketName}){
     'In-progress multipart uploads list the upload ID': s => s.includes(uploadId),
   })
 
-  // TBD: upload parts
-
   // abort the multipart upload
   stdOut = s3api("abort-multipart-upload", bucketName, [
     "--key", keyName,
@@ -69,4 +73,66 @@ export function createMultipartUpload({bucketName}){
   ])
   console.info("Abort Output:", stdOut)
   
+}
+
+export function completeMultipartUpload({bucketName}) {
+  // setup
+  const keyName = crypto.randomUUID()
+  let chunkCount = 2
+  let chunks = generateMultipartFiles(keyName, chunkCount)
+
+  // create the multipart upload
+  let stdOut = s3api("create-multipart-upload", bucketName, [
+    "--key", keyName
+  ])
+  console.info("Create Output", stdOut)
+  let parsedResult = parse(stdOut)
+  const uploadId = parsedResult.UploadId 
+  check(uploadId, {
+    'CLI returns a response with UploadId': id => id !== undefined,
+  })
+
+  // upload parts
+  let etags = []
+  chunks.forEach(chunk => {
+    stdOut = s3api("upload-part", bucketName, [
+      "--key", keyName,
+      "--upload-id", uploadId,
+      "--part-number", chunk.partNumber,
+      "--body", chunk.path
+    ])
+    console.info("Upload part Output:", stdOut)
+    check(stdOut, {
+      'Uploaded part has Etag': s => s.includes("ETag")
+    })
+    etags.push(parse(stdOut))
+  })
+
+  // list uploaded parts
+  stdOut = s3api("list-parts", bucketName, [
+    "--key", keyName,
+    "--upload-id", uploadId
+  ])
+  console.info("List parts Output:", stdOut)
+  let parts = parse(stdOut).Parts
+  check(stdOut, {
+    'List parts has all Etags': s => checkParts(parts, etags)
+  })
+
+  // complete multipart
+  parts = parts.map(p => { 
+    return {"PartNumber": p.PartNumber, "ETag": p.ETag}
+  })
+  stdOut = s3api("complete-multipart-upload", bucketName, [
+    "--key", keyName,
+    "--upload-id", uploadId,
+    "--multipart-upload", JSON.stringify({Parts: parts})
+  ])
+  console.info("Complete multipart Output:", stdOut)
+  check(stdOut, {
+    'Completed multipart has Etag': s => s.includes("ETag")
+  })
+
+  removeMultipartFiles(keyName, chunkCount)
+
 }
