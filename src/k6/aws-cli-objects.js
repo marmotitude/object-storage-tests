@@ -1,7 +1,7 @@
 import exec from 'k6/x/exec';
 import { check, fail } from 'k6'
 import { crypto } from "k6/experimental/webcrypto"
-import { parse, checkParts, generateMultipartFiles, removeMultipartFiles } from './utils.js'
+import { parseJsonOrFail, checkParts, generateMultipartFiles, removeMultipartFiles } from './utils.js'
 
 const profileName = __ENV.AWS_CLI_PROFILE
 const endpoint = __ENV.S3_ENDPOINT
@@ -17,6 +17,16 @@ function s3api(cmdName, bucketName, args){
   ])
 }
 
+function s3(cmdName, args){
+  return exec.command("aws", [
+    "s3",
+    "--profile", profileName,
+    "--endpoint", endpoint,
+    cmdName,
+    ...args,
+  ])
+}
+
 export function setup() {
   // create bucket to be used by the tests
   const bucketName = `test-aws-cli-${crypto.randomUUID()}`
@@ -25,18 +35,10 @@ export function setup() {
 }
 
 export function teardown({bucketName}) {
-  // list objects
-  let stdOut = s3api("list-objects", bucketName, [])
-  let contents = parse(stdOut).Contents
-  let objects = contents.map(o => {
-    return {"Key": o.Key}
-  })
-  // delete objects
-  stdOut = s3api("delete-objects", bucketName, [
-    "--delete", JSON.stringify({Objects: objects})
-  ])
   // delete bucket used by the tests
-  console.log(s3api("delete-bucket", bucketName, []))
+  console.log(s3("rb", [
+    `s3://${bucketName}`, "--force"
+  ]))
 }
 
 export default function scenarios(data) {
@@ -52,7 +54,7 @@ export function createMultipartUpload({bucketName}){
     "--key", keyName
   ])
   console.info("Create Output", stdOut)
-  let parsedResult = parse(stdOut)
+  let parsedResult = parseJsonOrFail(stdOut)
   const uploadId = parsedResult.UploadId 
   check(uploadId, {
     'CLI returns a response with UploadId': id => id !== undefined,
@@ -86,7 +88,7 @@ export function completeMultipartUpload({bucketName}) {
     "--key", keyName
   ])
   console.info("Create Output", stdOut)
-  let parsedResult = parse(stdOut)
+  let parsedResult = parseJsonOrFail(stdOut)
   const uploadId = parsedResult.UploadId 
   check(uploadId, {
     'CLI returns a response with UploadId': id => id !== undefined,
@@ -105,7 +107,7 @@ export function completeMultipartUpload({bucketName}) {
     check(stdOut, {
       'Uploaded part has Etag': s => s.includes("ETag")
     })
-    etags.push(parse(stdOut))
+    etags.push(parseJsonOrFail(stdOut))
   })
 
   // list uploaded parts
@@ -114,7 +116,7 @@ export function completeMultipartUpload({bucketName}) {
     "--upload-id", uploadId
   ])
   console.info("List parts Output:", stdOut)
-  let parts = parse(stdOut).Parts
+  let parts = parseJsonOrFail(stdOut).Parts
   check(stdOut, {
     'List parts has all Etags': s => checkParts(parts, etags)
   })
