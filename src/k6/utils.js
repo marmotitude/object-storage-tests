@@ -3,7 +3,7 @@ import { fail } from 'k6'
 import file from 'k6/x/file';
 
 // parse JSON
-export function parse(value) {
+export function parseJsonOrFail(value) {
   let parsedResult;
   try {
     parsedResult = JSON.parse(value)
