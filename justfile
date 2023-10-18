@@ -114,14 +114,26 @@ _k6-run remote testname results_dir *args:
     --console-output="{{results_dir}}/k6-{{testname}}.console.log" \
     {{args}} 2>&1 | tee "{{results_dir}}/k6-{{testname}}.log"
 
+_test-k6-exec remote results_dir:
+  #!/usr/bin/env sh
+  swift_config=`dasel -f config.yaml -s remotes.{{remote}}.swift.user`
+  if [ "$swift_config" != "" ];then
+    just _k6-run {{remote}} swift-cli-account {{results_dir}}
+  fi
+  just _k6-run {{remote}} aws-cli-objects {{results_dir}}
+
 # TODO remove this bucket_name argument when k6-jslib-aws is able to create buckets 
 #       see: https://github.com/grafana/k6-jslib-aws/issues/69
 k6_test_bucket := "test-jslib-aws-"
 __test-k6 remote unique_sufix results_dir:
   # create local folder for storing results
   mkdir -p {{results_dir}}
-  @just _k6-run {{remote}} swift-cli-account {{results_dir}}
-  @just _k6-run {{remote}} aws-cli-objects {{results_dir}}
+  # tests using cli tools
+  @just _test-k6-exec {{remote}} {{results_dir}}
+  # tests using k6-jslib-aws
+  @just _test-k6-jslib-aws {{remote}} {{unique_sufix}} {{results_dir}}
+
+_test-k6-jslib-aws remote unique_sufix results_dir:
   # TODO: remove this mkdir once k6 is able to create buckets
   rclone mkdir {{remote}}-s3:{{k6_test_bucket}}{{unique_sufix}}
   # TODO: remove this env once k6 is able to create buckets
