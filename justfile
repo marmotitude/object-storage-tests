@@ -120,6 +120,7 @@ k6_test_bucket := "test-jslib-aws-"
 __test-k6 remote unique_sufix results_dir:
   # create local folder for storing results
   mkdir -p {{results_dir}}
+  @just _k6-run {{remote}} swift-cli-account {{results_dir}}
   @just _k6-run {{remote}} aws-cli-objects {{results_dir}}
   # TODO: remove this mkdir once k6 is able to create buckets
   rclone mkdir {{remote}}-s3:{{k6_test_bucket}}{{unique_sufix}}
