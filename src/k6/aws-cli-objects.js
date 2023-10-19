@@ -11,11 +11,8 @@ function s3api(cmdName, bucketName, args){
   ])
 }
 
-function s3(cmdName, args){
-  return exec.command("aws", [
-    "s3",
-    "--profile", profileName,
-    "--endpoint", endpoint,
+function s3(cmdName, args=[]){
+  return aws("s3", [
     cmdName,
     ...args,
   ])
