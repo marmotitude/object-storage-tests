@@ -44,6 +44,7 @@ export function teardown({bucketName}) {
 export default function scenarios(data) {
   createMultipartUpload(data)
   completeMultipartUpload(data)
+  copyMultipartUpload(data)
 }
 
 export function createMultipartUpload({bucketName}){
@@ -136,5 +137,65 @@ export function completeMultipartUpload({bucketName}) {
   })
 
   removeMultipartFiles(keyName, chunkCount)
+}
 
+export function copyMultipartUpload({bucketName}) {
+  // setup
+  const keyName = crypto.randomUUID()
+  let chunkCount = 2
+  let chunks = generateMultipartFiles(keyName, chunkCount)
+  let firstChunk = chunks[0]
+  let etags = []
+
+  // create the multipart upload
+  let stdOut = s3api("create-multipart-upload", bucketName, [
+    "--key", keyName
+  ])
+  console.info("Create Output", stdOut)
+  let parsedResult = parseJsonOrFail(stdOut)
+  const uploadId = parsedResult.UploadId 
+  check(uploadId, {
+    'CLI returns a response with UploadId': id => id !== undefined,
+  })
+
+  // upload any singlepart object
+  let singlePartKeyName = `${keyName}_singlepart`
+  stdOut = s3api("put-object", bucketName, [
+    "--key", singlePartKeyName,
+    "--body", firstChunk.path
+  ])
+  console.info("Upload object Output:", stdOut)
+  etags.push(parseJsonOrFail(stdOut))
+
+  // copy the singlepart object as second part
+  stdOut = s3api("upload-part-copy", bucketName, [
+    "--key", keyName,
+    "--upload-id", uploadId,
+    "--part-number", firstChunk.partNumber,
+    "--copy-source", `${bucketName}/${singlePartKeyName}`,
+  ])
+  console.info("Upload part copy Output:", stdOut)
+  check(stdOut, {
+    'Copy part has Etag': s => s.includes("ETag")
+  })
+
+  // list uploaded parts
+  stdOut = s3api("list-parts", bucketName, [
+    "--key", keyName,
+    "--upload-id", uploadId
+  ])
+  console.info("List parts Output:", stdOut)
+  let parts = parseJsonOrFail(stdOut).Parts
+  check(stdOut, {
+    'List parts uploaded with copy has Etags': s => checkParts(parts, etags)
+  })
+
+  // abort the multipart upload
+  stdOut = s3api("abort-multipart-upload", bucketName, [
+    "--key", keyName,
+    "--upload-id", uploadId, 
+  ])
+  console.info("Abort Output:", stdOut)
+
+  removeMultipartFiles(keyName, chunkCount)
 }
