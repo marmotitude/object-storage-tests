@@ -103,10 +103,10 @@ _k6-run remote testname results_dir *args:
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --env AWS_CLI_PROFILE={{remote}} \
-    --env S3_ACCESS_KEY_ID=`dasel -f {{config_file}} -s remotes.{{remote}}.s3.access_key` \
-    --env S3_SECRET_ACCESS_KEY=`dasel -f {{config_file}} -s .remotes.{{remote}}.s3.secret_key` \
-    --env S3_ENDPOINT=`dasel -f {{config_file}} -s remotes.{{remote}}.s3.endpoint` \
-    --env S3_REGION=`dasel -f {{config_file}} -s remotes.{{remote}}.s3.region` \
+    --env S3_ACCESS_KEY_ID=$(dasel -f {{config_file}} -s remotes.{{remote}}.s3.access_key) \
+    --env S3_SECRET_ACCESS_KEY=$(dasel -f {{config_file}} -s .remotes.{{remote}}.s3.secret_key) \
+    --env S3_ENDPOINT=$(dasel -f {{config_file}} -s remotes.{{remote}}.s3.endpoint) \
+    --env S3_REGION=$(dasel -f {{config_file}} -s remotes.{{remote}}.s3.region) \
     --env SWIFT_AUTH_URL=$(dasel -f config.yaml -s remotes.{{ remote }}.swift.auth) \
     --env SWIFT_USER=$(dasel -f config.yaml -s remotes.{{ remote }}.swift.user) \
     --env SWIFT_KEY=$(dasel -f config.yaml -s remotes.{{ remote }}.swift.key) \
@@ -119,6 +119,7 @@ _test-k6-exec remote results_dir:
   swift_config=`dasel -f config.yaml -s remotes.{{remote}}.swift.user`
   if [ "$swift_config" != "" ];then
     just _k6-run {{remote}} swift-cli-account {{results_dir}}
+    just _k6-run {{remote}} swift-cli-s3api-multipart {{results_dir}}
   fi
   just _k6-run {{remote}} aws-cli-objects {{results_dir}}
 
