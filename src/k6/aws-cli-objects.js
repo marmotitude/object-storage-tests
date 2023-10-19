@@ -1,16 +1,10 @@
 import exec from 'k6/x/exec';
 import { check, fail } from 'k6'
 import { crypto } from "k6/experimental/webcrypto"
-import { parseJsonOrFail, checkParts, generateMultipartFiles, removeMultipartFiles } from './utils.js'
-
-const profileName = __ENV.AWS_CLI_PROFILE
-const endpoint = __ENV.S3_ENDPOINT
+import { aws, parseJsonOrFail, checkParts, generateMultipartFiles, removeMultipartFiles } from './utils.js'
 
 function s3api(cmdName, bucketName, args){
-  return exec.command("aws", [
-    "s3api",
-    "--profile", profileName,
-    "--endpoint", endpoint,
+  return aws("s3api", [
     cmdName,
     "--bucket", bucketName,
     ...args,
