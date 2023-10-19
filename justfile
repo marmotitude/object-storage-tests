@@ -7,8 +7,8 @@ aws_conf_exists := path_exists(env_var("HOME") + "/.aws")
 
 # k6
 # https://k6.io/docs/get-started/running-k6/#adding-more-vus
-k6_vus := "2"
-k6_iterations := "2"
+k6_vus := "1"
+k6_iterations := "1"
 
 
 # Public Recipes
