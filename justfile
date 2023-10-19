@@ -23,6 +23,7 @@ check-tools:
   k6 version
   aws --version
   rclone --version | head -n1
+  swift --version
   openssl version
   gotpl version | head -n1
   dasel --version
@@ -102,13 +103,24 @@ _k6-run remote testname results_dir *args:
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --env AWS_CLI_PROFILE={{remote}} \
-    --env S3_ACCESS_KEY_ID=`dasel -f {{config_file}} -s remotes.{{remote}}.access_key` \
-    --env S3_SECRET_ACCESS_KEY=`dasel -f {{config_file}} -s .remotes.{{remote}}.secret_key` \
-    --env S3_ENDPOINT=`dasel -f {{config_file}} -s remotes.{{remote}}.endpoint` \
-    --env S3_REGION=`dasel -f {{config_file}} -s remotes.{{remote}}.region` \
+    --env S3_ACCESS_KEY_ID=`dasel -f {{config_file}} -s remotes.{{remote}}.s3.access_key` \
+    --env S3_SECRET_ACCESS_KEY=`dasel -f {{config_file}} -s .remotes.{{remote}}.s3.secret_key` \
+    --env S3_ENDPOINT=`dasel -f {{config_file}} -s remotes.{{remote}}.s3.endpoint` \
+    --env S3_REGION=`dasel -f {{config_file}} -s remotes.{{remote}}.s3.region` \
+    --env SWIFT_AUTH_URL=$(dasel -f config.yaml -s remotes.{{ remote }}.swift.auth) \
+    --env SWIFT_USER=$(dasel -f config.yaml -s remotes.{{ remote }}.swift.user) \
+    --env SWIFT_KEY=$(dasel -f config.yaml -s remotes.{{ remote }}.swift.key) \
     --out json="{{results_dir}}/k6-{{testname}}.json" \
     --console-output="{{results_dir}}/k6-{{testname}}.console.log" \
     {{args}} 2>&1 | tee "{{results_dir}}/k6-{{testname}}.log"
+
+_test-k6-exec remote results_dir:
+  #!/usr/bin/env sh
+  swift_config=`dasel -f config.yaml -s remotes.{{remote}}.swift.user`
+  if [ "$swift_config" != "" ];then
+    just _k6-run {{remote}} swift-cli-account {{results_dir}}
+  fi
+  just _k6-run {{remote}} aws-cli-objects {{results_dir}}
 
 # TODO remove this bucket_name argument when k6-jslib-aws is able to create buckets 
 #       see: https://github.com/grafana/k6-jslib-aws/issues/69
@@ -116,15 +128,20 @@ k6_test_bucket := "test-jslib-aws-"
 __test-k6 remote unique_sufix results_dir:
   # create local folder for storing results
   mkdir -p {{results_dir}}
-  @just _k6-run {{remote}} aws-cli-objects {{results_dir}}
+  # tests using cli tools
+  @just _test-k6-exec {{remote}} {{results_dir}}
+  # tests using k6-jslib-aws
+  @just _test-k6-jslib-aws {{remote}} {{unique_sufix}} {{results_dir}}
+
+_test-k6-jslib-aws remote unique_sufix results_dir:
   # TODO: remove this mkdir once k6 is able to create buckets
-  rclone mkdir {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
+  rclone mkdir {{remote}}-s3:{{k6_test_bucket}}{{unique_sufix}}
   # TODO: remove this env once k6 is able to create buckets
   @just _k6-run {{remote}} buckets {{results_dir}} --env S3_TEST_BUCKET_NAME={{k6_test_bucket}}{{unique_sufix}}
   # TODO: remove this env once k6 is able to create buckets
   @just _k6-run {{remote}} objects {{results_dir}} --env S3_TEST_BUCKET_NAME={{k6_test_bucket}}{{unique_sufix}}
   # TODO: remove this purge once k6 is able to delete buckets
-  rclone purge {{remote}}:{{k6_test_bucket}}{{unique_sufix}}
+  rclone purge {{remote}}-s3:{{k6_test_bucket}}{{unique_sufix}}
 
 _test-k6 remote timestamp unique_sufix:
   @just __test-k6 {{remote}} {{unique_sufix}} {{results_prefix}}/{{remote}}/{{timestamp}}
@@ -212,7 +229,7 @@ __test-aws-s3api remote unique_sufix endpoint results_dir:
     --debug
 
 _test-aws-s3api remote timestamp unique_sufix:
-  @just __test-aws-s3api {{remote}} {{unique_sufix}} `dasel -f {{config_file}} -s remotes.{{remote}}.endpoint` {{results_prefix}}/{{remote}}/{{timestamp}}
+  @just __test-aws-s3api {{remote}} {{unique_sufix}} `dasel -f {{config_file}} -s remotes.{{remote}}.s3.endpoint` {{results_prefix}}/{{remote}}/{{timestamp}}
 
 
 _test remote timestamp unique_sufix:
@@ -223,7 +240,7 @@ __test-rclone remote unique_sufix results_dir:
   # create local directory for results and logs
   mkdir -p {{results_dir}}
   # create a remote bucket to upload test files
-  rclone mkdir {{test_dir}}{{unique_sufix}}
+  rclone mkdir {{remote}}-s3:{{test_dir}}{{unique_sufix}}
   # create local directories with test files
   rclone test makefiles \
     {{test_dir}}/test_ascii --ascii \
@@ -233,15 +250,15 @@ __test-rclone remote unique_sufix results_dir:
   # sync local and remote test dirs, save logs to local results dir
   \time -f "{{time_format}}" -o "{{results_dir}}/time_upload" \
     rclone sync \
-    {{test_dir}} {{remote}}:{{test_dir}}{{unique_sufix}} \
+    {{test_dir}} {{remote}}-s3:{{test_dir}}{{unique_sufix}} \
     -v --log-file {{results_dir}}/makefiles_ascii_sync.log
   # (optional) test rclone cat
-  rclone copy {{results_dir}}/time_upload {{remote}}:{{test_dir}}{{unique_sufix}}/time_upload
-  -rclone cat {{remote}}:{{test_dir}}{{unique_sufix}}/time_upload
+  rclone copy {{results_dir}}/time_upload {{remote}}-s3:{{test_dir}}{{unique_sufix}}/time_upload
+  -rclone cat {{remote}}-s3:{{test_dir}}{{unique_sufix}}/time_upload
   # delete remote test dirs, save logs to local results dir
   \time -f "{{time_format}}" -o "{{results_dir}}/time_purge" \
     rclone purge \
-    {{remote}}:{{test_dir}}{{unique_sufix}} \
+    {{remote}}-s3:{{test_dir}}{{unique_sufix}} \
     -v --log-file {{results_dir}}/purge_bucket.log
   # cleanup test folders
   rm -rf {{test_dir}}*
