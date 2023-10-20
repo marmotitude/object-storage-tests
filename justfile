@@ -35,8 +35,8 @@ list-remotes: _setup
   aws configure list-profiles
 
 # Test a S3-compatible provider with k6
-test remote: _setup-rclone _setup-aws
-  @just _test-k6 {{remote}} {{date}} `just _print-unique-name`
+test remote testname="index-s3": _setup-rclone _setup-aws
+  @just _test-k6 {{remote}} {{date}} `just _print-unique-name` {{testname}}
 
 # Build main docker image. Builder can be docker or podman.
 build builder="docker":
@@ -117,24 +117,18 @@ _k6-run remote testname results_dir *args:
 # TODO remove this bucket_name argument when k6-jslib-aws is able to create buckets 
 #       see: https://github.com/grafana/k6-jslib-aws/issues/69
 k6_test_bucket := "test-jslib-aws-"
-__test-k6 remote unique_sufix results_dir:
-  #!/usr/bin/env sh
+__test-k6 remote unique_sufix results_dir testname:
   # create local folder for storing results
   mkdir -p {{results_dir}}
   # TODO: remove this mkdir once k6 is able to create buckets
   rclone mkdir {{remote}}-s3:{{k6_test_bucket}}{{unique_sufix}}
   # TODO: remove this env S3_TEST_BUCKET_NAME once k6 is able to create buckets
-  just _k6-run {{remote}} index-s3 {{results_dir}} --env S3_TEST_BUCKET_NAME={{k6_test_bucket}}{{unique_sufix}}
+  just _k6-run {{remote}} {{testname}} {{results_dir}} --env S3_TEST_BUCKET_NAME={{k6_test_bucket}}{{unique_sufix}}
   # TODO: remove this purge once k6 is able to delete buckets
   rclone purge {{remote}}-s3:{{k6_test_bucket}}{{unique_sufix}}
-  # run swift tests if the remote have swift API
-  swift_config=`dasel -f config.yaml -s remotes.{{remote}}.swift.user`
-  if [ "$swift_config" != "" ];then
-    just _k6-run {{remote}} index-swift {{results_dir}}
-  fi
 
-_test-k6 remote timestamp unique_sufix:
-  @just __test-k6 {{remote}} {{unique_sufix}} {{results_prefix}}/{{remote}}/{{timestamp}}
+_test-k6 remote timestamp unique_sufix testname:
+  @just __test-k6 {{remote}} {{unique_sufix}} {{results_prefix}}/{{remote}}/{{timestamp}} {{testname}}
 
 
 #------------------
