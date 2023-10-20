@@ -10,6 +10,8 @@ export default function scenarios(data) {
   accountStats()
 }
 
+export function teardown(){}
+
 export function accountStats() {
   const stdOut = swift("stat")
   console.log(stdOut)
