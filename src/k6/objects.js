@@ -2,16 +2,25 @@ import { check } from 'k6'
 import { crypto } from "k6/experimental/webcrypto"
 import makeS3Client from "./s3-client.js"
 
-const s3 = makeS3Client();
-const testBucketName = __ENV.S3_TEST_BUCKET_NAME
+// k6LibBuckets init stage
 const testFile = open("../../LICENSE", "r")
+const s3 = makeS3Client();
 
-export default async function scenarios() {
-  await putObject()
-  await abortMultipart()
+export default async function scenarios(data) {
+  await putObject(data)
+  await abortMultipart(data)
+}
+export function setup(){
+  const testBucketName = __ENV.S3_TEST_BUCKET_NAME
+  return {
+    testBucketName,
+    testFile,
+  }
 }
 
-export async function putObject() {
+export function teardown(data){}
+
+export async function putObject({testBucketName, testFile}) {
   const testFileKey = `object_${crypto.randomUUID()}`
   console.info(`uploading test file ${testFileKey} to bucket ${testBucketName}`)
   await s3.putObject(testBucketName, testFileKey, testFile);
@@ -21,7 +30,7 @@ export async function putObject() {
   })
 }
 
-export async function abortMultipart(data) {
+export async function abortMultipart({testBucketName, testFile}) {
   const testFileKey = `object_${crypto.randomUUID()}`
   console.info(`creating multipart upload of ${testFileKey} on bucket ${testBucketName}...`)
   let multipartUpload = undefined
