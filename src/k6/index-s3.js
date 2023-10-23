@@ -20,7 +20,8 @@ import {
 // XXX: due to k6 this is the aggregated copy/paste of each init stage
 // of the individual tests
 const s3 = makeS3Client(); // buckets.js, objects.js
-const testFile = open("../../LICENSE", "r"); //objects.js
+const testFileName = "LICENSE"
+const testFile = open(`../../${testFileName}`, "r"); //objects.js
 
 export function setup() {
   let setupData = {};
