@@ -1,7 +1,11 @@
 import exec from 'k6/x/exec';
 import { check, fail } from 'k6'
 import { crypto } from "k6/experimental/webcrypto"
+import http from 'k6/http';
 import { aws, parseJsonOrFail, checkParts, generateMultipartFiles, removeMultipartFiles } from './utils.js'
+
+const testFileName = "LICENSE"
+const testFile = open(`../../${testFileName}`, "r"); //objects.js
 
 function s3api(cmdName, bucketName, args){
   return aws("s3api", [
@@ -33,9 +37,34 @@ export function teardown({bucketName}) {
 }
 
 export default function scenarios(data) {
+  presignGet(data)
   createMultipartUpload(data)
   completeMultipartUpload(data)
   copyMultipartUpload(data)
+}
+
+export function presignGet({bucketName}) {
+  const fileName = `get-${testFileName}`
+
+  // upload a test file
+  const uploadOutput = s3("cp", [ testFileName, `s3://${bucketName}/${fileName}` ])
+  console.log({uploadOutput})
+  check(uploadOutput, {
+    "[aws s3 cp] cp output contains filename": o => o.includes(testFileName),
+    "[aws s3 cp] cp output contains bucket name": o => o.includes(bucketName),
+    "[aws s3 cp] cp output contains object key": o => o.includes(fileName),
+  })
+
+  // generate presigned url using AWS-CLI
+  const url = s3("presign", [ `s3://${bucketName}/${fileName}` ])
+  console.log(`Pre-signed GET URL=${url}`)
+  check(url, {"[aws s3 presign] Pre-signed GET URL contains query parameter Signature": u => u.includes("Signature=")})
+
+  // download testFile using GET on that url before the expirantion date
+  const res = http.get(url.trim())
+  console.log(`GET response=${res.body}`)
+  console.log(`GET response status =${res.status}`)
+  check(res.status, {"[aws s3 presign] GET response have status 200": s => s === 200 })
 }
 
 export function createMultipartUpload({bucketName}){
