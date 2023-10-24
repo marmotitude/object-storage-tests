@@ -26,9 +26,11 @@ client = my_session.client(
 
 def generate_presigned_put_url():
     s3_client = client
-    client_method = 'list_buckets'
+    client_method = 'put_object'
+    bucket_name = sys.argv[3]
+    key_name = sys.argv[4]
     try:
-        url = s3_client.generate_presigned_url(ClientMethod= client_method, HttpMethod="PUT",)
+        url = s3_client.generate_presigned_url(ClientMethod= client_method, HttpMethod="PUT", Params={'Bucket': bucket_name, 'Key': key_name})
     except:
         print(
             "Couldn't get a presigned URL for client method '%s'.", client_method

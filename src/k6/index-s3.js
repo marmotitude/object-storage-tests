@@ -15,6 +15,11 @@ import {
   setup as awsCliSetup,
   teardown as awsCliTeardown,
 } from "./aws-cli-objects.js";
+import {
+  default as boto3Test,
+  setup as boto3Setup,
+  teardown as boto3Teardown
+} from "./boto3-presigned.js";
 
 // init stage
 // XXX: due to k6 this is the aggregated copy/paste of each init stage
@@ -34,12 +39,16 @@ export function setup() {
   describe("Setup aws-cli tests", (_t) => {
     setupData.awsCliData = awsCliSetup();
   });
+  describe("Setup boto3 test", (_t) => {
+    setupData.boto3Data = boto3Setup();
+  });
   return setupData;
 }
 export default function ({
   k6JsLibBucketsData,
   k6JsLibObjectsData,
   awsCliData,
+  boto3Data,
 }) {
   describe("Run k6-jslib-aws buckets test", async (_t) => {
     await k6JsLibBucketsTest(k6JsLibBucketsData);
@@ -50,11 +59,16 @@ export default function ({
   describe("Run aws-cli tests", (_t) => {
     awsCliTest(awsCliData);
   });
+    describe("Run boto3 presign test", (_t) => {
+      boto3Test(boto3Data);
+    });
 }
+
 export function teardown({
   k6JsLibBucketsData,
   k6JsLibObjectsData,
   awsCliData,
+  boto3Data,
 }) {
   describe("Teardown k6-jslib-aws objects test", (_t) => {
     k6JsLibObjectsTeardown(k6JsLibObjectsData);
@@ -64,5 +78,8 @@ export function teardown({
   });
   describe("Teardown aws-cli tests", (_t) => {
     awsCliTeardown(awsCliData);
+  });
+  describe("Teardown boto3 presign test", (_t) => {
+     boto3Teardown(boto3Data);
   });
 }
