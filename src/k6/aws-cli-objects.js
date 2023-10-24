@@ -64,7 +64,7 @@ export function presignGet({bucketName}) {
   const res = http.get(url.trim())
   console.log(`GET response=${res.body}`)
   console.log(`GET response status =${res.status}`)
-  check(res.status, {"[aws s3 presign] GET response have status 200": s => s === 200 })
+  check(res.status, {"[download] GET response have status 200": s => s === 200 })
 }
 
 export function createMultipartUpload({bucketName}){
@@ -78,15 +78,15 @@ export function createMultipartUpload({bucketName}){
   let parsedResult = parseJsonOrFail(stdOut)
   const uploadId = parsedResult.UploadId 
   check(uploadId, {
-    'CLI returns a response with UploadId': id => id !== undefined,
+    '[aws s3api create-multipart-upload] CLI returns a response with UploadId': id => id !== undefined,
   })
 
   // list multipart uploads
   stdOut = s3api("list-multipart-uploads", bucketName, [])
   console.info("List Output", stdOut)
   check(stdOut, {
-    'In-progress multipart uploads list the key': s => s.includes(keyName),
-    'In-progress multipart uploads list the upload ID': s => s.includes(uploadId),
+    '[aws s3api list-multipart-uploads] In-progress multipart uploads list the key': s => s.includes(keyName),
+    '[aws s3api list-multipart-uploads] In-progress multipart uploads list the upload ID': s => s.includes(uploadId),
   })
 
   // abort the multipart upload
@@ -112,7 +112,7 @@ export function completeMultipartUpload({bucketName}) {
   let parsedResult = parseJsonOrFail(stdOut)
   const uploadId = parsedResult.UploadId 
   check(uploadId, {
-    'CLI returns a response with UploadId': id => id !== undefined,
+    '[aws s3api create-multipart-upload] CLI returns a response with UploadId': id => id !== undefined,
   })
 
   // upload parts
@@ -126,7 +126,7 @@ export function completeMultipartUpload({bucketName}) {
     ])
     console.info("Upload part Output:", stdOut)
     check(stdOut, {
-      'Uploaded part has Etag': s => s.includes("ETag")
+      '[aws s3api upload-part] Uploaded part has Etag': s => s.includes("ETag")
     })
     etags.push(parseJsonOrFail(stdOut))
   })
@@ -139,7 +139,7 @@ export function completeMultipartUpload({bucketName}) {
   console.info("List parts Output:", stdOut)
   let parts = parseJsonOrFail(stdOut).Parts
   check(stdOut, {
-    'List parts has all Etags': s => checkParts(parts, etags)
+    '[aws s3api list-parts] List parts has all Etags': s => checkParts(parts, etags)
   })
 
   // complete multipart
@@ -153,7 +153,7 @@ export function completeMultipartUpload({bucketName}) {
   ])
   console.info("Complete multipart Output:", stdOut)
   check(stdOut, {
-    'Completed multipart has Etag': s => s.includes("ETag")
+    '[aws s3api complete-multipart-upload] Completed multipart has Etag': s => s.includes("ETag")
   })
 
   removeMultipartFiles(keyName, chunkCount)
@@ -175,7 +175,7 @@ export function copyMultipartUpload({bucketName}) {
   let parsedResult = parseJsonOrFail(stdOut)
   const uploadId = parsedResult.UploadId 
   check(uploadId, {
-    'CLI returns a response with UploadId': id => id !== undefined,
+    '[aws s3api create-multipart-upload] CLI returns a response with UploadId': id => id !== undefined,
   })
 
   // upload any singlepart object
@@ -196,7 +196,7 @@ export function copyMultipartUpload({bucketName}) {
   ])
   console.info("Upload part copy Output:", stdOut)
   check(stdOut, {
-    'Copy part has Etag': s => s.includes("ETag")
+    '[aws s3api upload-part-copy] Copy part has Etag': s => s.includes("ETag")
   })
 
   // list uploaded parts
@@ -207,7 +207,7 @@ export function copyMultipartUpload({bucketName}) {
   console.info("List parts Output:", stdOut)
   let parts = parseJsonOrFail(stdOut).Parts
   check(stdOut, {
-    'List parts uploaded with copy has Etags': s => checkParts(parts, etags)
+    '[aws s3api list-parts] List parts uploaded with copy has Etags': s => checkParts(parts, etags)
   })
 
   // abort the multipart upload
