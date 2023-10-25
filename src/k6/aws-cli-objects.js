@@ -1,14 +1,16 @@
-import exec from 'k6/x/exec';
 import { check, fail } from 'k6'
 import { crypto } from "k6/experimental/webcrypto"
 import http from 'k6/http';
-import { aws, parseJsonOrFail, checkParts, generateMultipartFiles, removeMultipartFiles } from './utils.js'
+import exec from 'k6/x/exec';
+import { parse as yamlParse } from "k6/x/yaml";
+import { aws, parseJsonOrFail, checkParts, generateMultipartFiles, removeMultipartFiles } from './utils/index.js'
 
 const testFileName = "LICENSE"
-const testFile = open(`../../${testFileName}`, "r"); //objects.js
+const config = yamlParse(open('../../config.yaml'));
+const s3Config = config.remotes[__ENV.AWS_CLI_PROFILE].s3
 
 function s3api(cmdName, bucketName, args){
-  return aws("s3api", [
+  return aws(s3Config, "s3api", [
     cmdName,
     "--bucket", bucketName,
     ...args,
@@ -16,7 +18,7 @@ function s3api(cmdName, bucketName, args){
 }
 
 function s3(cmdName, args=[]){
-  return aws("s3", [
+  return aws(s3Config, "s3", [
     cmdName,
     ...args,
   ])

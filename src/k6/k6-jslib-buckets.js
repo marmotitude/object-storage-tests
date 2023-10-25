@@ -1,11 +1,17 @@
 import { check, fail } from 'k6'
-import makeS3Client from "./s3-client.js"
+import { crypto } from "k6/experimental/webcrypto"
+import { parse as yamlParse } from "k6/x/yaml";
+import makeS3Client from "./utils/s3-client.js"
+import { aws } from "./utils/clis.js"
 
 // k6LibBuckets init stage
-const s3 = makeS3Client();
+const config = yamlParse(open('../../config.yaml'));
+const s3Config = config.remotes[__ENV.AWS_CLI_PROFILE].s3
+const s3 = makeS3Client(config.remotes[__ENV.AWS_CLI_PROFILE].s3);
 
 export function setup() {
-  const bucketName = __ENV.S3_TEST_BUCKET_NAME
+  const bucketName = `test-k6-jslib-aws-${crypto.randomUUID()}`
+  console.log(aws(s3Config, "s3", ["mb", `s3://${bucketName}`]))
   return {bucketName}
 }
 
@@ -26,4 +32,9 @@ export default async function({bucketName}){
   })
 }
 
-export function teardown(data) { }
+export function teardown({bucketName}) {
+    // delete bucket used by the tests
+    console.log(aws(s3Config, "s3", [ "rb",
+      `s3://${bucketName}`, "--force"
+    ]))
+  }
