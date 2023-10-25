@@ -3,7 +3,7 @@ A growing test suite for S3-like object storage implementations.
 
 ## About
 This project uses the load tests framework [k6][k6] (extended
-with the [xk6-exec][k6-exec] and [xk6-file][xk6-file] extensions)
+with the [xk6-exec][xk6-exec] and [xk6-file][xk6-file] extensions)
 as the basis to execute test scenarios using popular open source
 command line tools like [aws-cli][aws-cli], [rclone][rclone],
 as well as the open source k6 module [k6-jslib-aws][k6-jslib-aws].
