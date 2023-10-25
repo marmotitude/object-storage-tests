@@ -15,6 +15,7 @@ export function setup() {
 
 export default function scenarios (data){
     presignPut(data)
+    listObject(data)
 }
 
 export function teardown({bucketName}) {
@@ -34,3 +35,8 @@ export function presignPut({bucketName}){
   check(res.status, {"[upload] PUT response have status 200": s => s === 200 })
 }
 
+export function listObject({bucketName}){
+  const list = (aws("s3", ["ls", `s3://${bucketName}/${testFileName}`]))
+  console.log(`List s3=${list}`)
+  check(list, {"[List] response contains object name":l => l.includes(testFileName)})
+}
