@@ -39,7 +39,7 @@ list-tests:
   ls src/k6/ \
     --ignore utils.js \
     --ignore s3-client.js \
-    | sed "s/.js//g"
+    | sed "s/\.js//g"
 
 # Test a S3-compatible provider with k6
 test remote test_name="index-s3": _setup-rclone _setup-aws
