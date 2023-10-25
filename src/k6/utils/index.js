@@ -1,41 +1,13 @@
 import { randomBytes } from 'k6/crypto';
 import { fail } from 'k6'
 import file from 'k6/x/file';
-import exec from 'k6/x/exec';
+export { aws, swift } from './clis.js';
 
-const profileName = __ENV.AWS_CLI_PROFILE
-const endpoint = __ENV.S3_ENDPOINT
-const region = __ENV.S3_REGION
-const authUrl = __ENV.SWIFT_AUTH_URL // URL for obtaining an auth token
-const user = __ENV.SWIFT_USER // User name for obtaining an auth token.
-const key = __ENV.SWIFT_KEY // Key for obtaining an auth token.
-const authVersion = "1.0" // Specify a version for authentication.
-
-
-export function aws(subCommand, args=[]){
-  return exec.command("aws", [
-    subCommand,
-    "--profile", profileName,
-    "--endpoint", endpoint,
-    "--region", region,
-    ...args,
-  ])
-}
-export function swift(cmdName, args=[]){
-  return exec.command("swift", [
-    "--auth-version", authVersion,
-    "--auth", authUrl,
-    "--user", user,
-    "--key", key,
-    cmdName,
-    ...args,
-  ])
-}
-export function swiftSetupCheck() {
+export function swiftSetupCheck({user, key, auth}={}) {
   let errors = []
-  if (!authUrl) { errors.push("Missing SWIFT_AUTH_URL") }
-  if (!user) { errors.push("Missing SWIFT_USER") }
-  if (!key) { errors.push("Missing SWIFT_KEY") }
+  if (!auth) { errors.push("Missing swift.auth") }
+  if (!user) { errors.push("Missing swift.user") }
+  if (!key) { errors.push("Missing swift.key") }
   return errors
 }
 

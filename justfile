@@ -43,13 +43,12 @@ list-remotes: _setup
 # List test scenarios
 list-tests:
   ls src/k6/ \
-    --ignore utils.js \
-    --ignore s3-client.js \
+    --ignore utils \
     | sed "s/\.js//g"
 
 # Test a S3-compatible provider with k6
 test remote test_name="index-s3": _setup-rclone _setup-aws
-  @just _test-k6 {{remote}} {{test_name}} {{date}} `just _print-unique-name`
+  @just _test-k6 {{remote}} {{test_name}} {{date}}
 
 # Run main docker image
 run *args:
@@ -108,43 +107,24 @@ __setup-aws:
 # setup cli tools
 _setup: _setup-rclone _setup-aws
 
-# prints a random string
-_print-unique-name:
-  openssl rand -hex 12
-
 # run k6 test with env vars
 _k6-run remote testname results_dir *args:
   k6 run src/k6/{{testname}}.js \
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --env AWS_CLI_PROFILE={{remote}} \
-    --env S3_ACCESS_KEY_ID=$(dasel -f {{config_file}} -s remotes.{{remote}}.s3.access_key) \
-    --env S3_SECRET_ACCESS_KEY=$(dasel -f {{config_file}} -s .remotes.{{remote}}.s3.secret_key) \
-    --env S3_ENDPOINT=$(dasel -f {{config_file}} -s remotes.{{remote}}.s3.endpoint) \
-    --env S3_REGION=$(dasel -f {{config_file}} -s remotes.{{remote}}.s3.region) \
-    --env SWIFT_AUTH_URL=$(dasel -f config.yaml -s remotes.{{ remote }}.swift.auth) \
-    --env SWIFT_USER=$(dasel -f config.yaml -s remotes.{{ remote }}.swift.user) \
-    --env SWIFT_KEY=$(dasel -f config.yaml -s remotes.{{ remote }}.swift.key) \
     --out json="{{results_dir}}/k6-{{testname}}.json" \
     --console-output="{{results_dir}}/k6-{{testname}}.console.log" \
     {{args}} 2>&1 | tee "{{results_dir}}/k6-{{testname}}.log"
 
-# TODO remove this bucket_name argument when k6-jslib-aws is able to create buckets 
-#       see: https://github.com/grafana/k6-jslib-aws/issues/69
-k6_test_bucket := "test-jslib-aws-"
-__test-k6 remote test_name unique_sufix results_dir:
+__test-k6 remote test_name results_dir:
   #!/usr/bin/env sh
   # create local folder for storing results
   mkdir -p {{results_dir}}
-  # TODO: remove this mkdir once k6 is able to create buckets
-  rclone mkdir {{remote}}-s3:{{k6_test_bucket}}{{unique_sufix}}
-  # TODO: remove this env S3_TEST_BUCKET_NAME once k6 is able to create buckets
-  just _k6-run {{remote}} {{test_name}} {{results_dir}} --env S3_TEST_BUCKET_NAME={{k6_test_bucket}}{{unique_sufix}}
-  # TODO: remove this purge once k6 is able to delete buckets
-  rclone purge {{remote}}-s3:{{k6_test_bucket}}{{unique_sufix}}
+  just _k6-run {{remote}} {{test_name}} {{results_dir}}
 
-_test-k6 remote test_name timestamp unique_sufix:
-  @just __test-k6 {{remote}} {{test_name}} {{unique_sufix}} {{results_prefix}}/{{remote}}/{{timestamp}}
+_test-k6 remote test_name timestamp:
+  @just __test-k6 {{remote}} {{test_name}} {{results_prefix}}/{{remote}}/{{timestamp}}
 
 
 #------------------
@@ -168,6 +148,10 @@ rclone_files_count := "50"
 
 # To be Deprecated Recipes
 #-------------------------
+
+# prints a random string
+_print-unique-name:
+  openssl rand -hex 12
 
 # (legacy) Run all tests
 legacy-test remote: _setup

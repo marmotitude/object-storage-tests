@@ -1,15 +1,16 @@
-import makeS3Client from "./s3-client.js";
 import { describe } from "https://jslib.k6.io/k6chaijs/4.3.4.3/index.js";
+import { parse as yamlParse } from "k6/x/yaml";
+import makeS3Client from "./utils/s3-client.js";
 import {
   default as k6JsLibBucketsTest,
   setup as k6JsLibBucketsSetup,
   teardown as k6JsLibBucketsTeardown,
-} from "./buckets.js";
+} from "./k6-jslib-buckets.js";
 import {
   default as k6JsLibObjectsTest,
   setup as k6JsLibObjectsSetup,
   teardown as k6JsLibObjectsTeardown,
-} from "./objects.js";
+} from "./k6-jslib-objects.js";
 import {
   default as awsCliTest,
   setup as awsCliSetup,
@@ -24,9 +25,12 @@ import {
 // init stage
 // XXX: due to k6 this is the aggregated copy/paste of each init stage
 // of the individual tests
-const s3 = makeS3Client(); // buckets.js, objects.js
+const config = yamlParse(open('../../config.yaml'));
+const s3Config = config.remotes[__ENV.AWS_CLI_PROFILE].s3
+const swiftConfig = config.remotes[__ENV.AWS_CLI_PROFILE].swift
+const s3 = makeS3Client(s3Config);
 const testFileName = "LICENSE"
-const testFile = open(`../../${testFileName}`, "r"); //objects.js
+const testFile = open(`../../${testFileName}`, "r");
 
 export function setup() {
   let setupData = {};
