@@ -21,6 +21,7 @@ _default:
 # Check dependencies
 check-tools:
   k6 version
+  python -c "import boto3"
   aws --version
   rclone --version | head -n1
   swift --version
@@ -76,7 +77,6 @@ _check-dev-tools:
   ssh -V
   git --version
   vim --version | head -n1
-  groff --version | head -n1
   bat --version
   rg --version | head -n1
 
