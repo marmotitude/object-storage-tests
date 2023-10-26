@@ -57,9 +57,9 @@ MIT License (c) 2023 Marmotidude and [AUTHORS](./AUTHORS)
 The easiest way to have a working developing environment is to use the provided dev-shell,
 using [distrobox][distrobox]:
 
-First build the image and the distrobox with:
+First assemble the distrobox with:
 ```
-just build-dev
+just assemble-dev
 ```
 
 Then enter it with

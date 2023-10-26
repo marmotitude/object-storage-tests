@@ -10,6 +10,11 @@ aws_conf_exists := path_exists(env_var("HOME") + "/.aws")
 k6_vus := "1"
 k6_iterations := "1"
 
+# OCI
+main_image := "docker.io/fczuardi/object-storage-tests:latest"
+devshell_image := "docker.io/fczuardi/object-storage-tests:devshell"
+distrobox_name := "devshell-obj"
+
 
 # Public Recipes
 #---------------
@@ -46,10 +51,6 @@ list-tests:
 test remote test_name="index-s3": _setup-rclone _setup-aws
   @just _test-k6 {{remote}} {{test_name}} {{date}} `just _print-unique-name`
 
-# Build main docker image. Builder can be docker or podman.
-build builder="docker":
-  {{builder}} build -t docker.io/fczuardi/object-storage-tests:latest -f ./Dockerfile .
-
 # Run main docker image
 run *args:
   mkdir -p results
@@ -57,16 +58,23 @@ run *args:
     --volume ./results:/app/results:Z \
     --volume .:/app/config:Z \
     --env "CONFIG_PATH=/app/config/" \
-    object-storage-tests {{args}}
+    {{main_image}} {{args}}
 
-# Build dev-shell image and assemble distrobox. Builder can be docker or podman.
-build-dev builder="docker":
-  {{builder}} build -t docker.io/fczuardi/object-storage-tests:devshell -f ./devshell.Dockerfile .
-  SHELL=/usr/bin/fish distrobox assemble create
+# Create create a distrobox for the dev-shell
+assemble-dev:
+  SHELL=/usr/bin/fish distrobox assemble create --replace
 
 # Enter dev-shell
 dev:
-  distrobox enter -a "--env EDITOR=/usr/bin/vim" devshell-obj
+  distrobox enter -a "--env EDITOR=/usr/bin/vim" {{distrobox_name}}
+
+# Build main docker image. Builder can be docker or podman.
+build builder="podman":
+  {{builder}} build --rm -t {{main_image}} -f ./Dockerfile .
+
+# Build dev-shell image and assemble distrobox. Builder can be docker or podman.
+build-dev builder="podman":
+  {{builder}} build --rm -t {{devshell_image}} -f ./devshell.Dockerfile .
 
 
 # Private recipes
