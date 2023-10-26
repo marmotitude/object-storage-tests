@@ -28,6 +28,8 @@ RUN pip install python-keystoneclient
 WORKDIR /app
 COPY src /app/src
 COPY justfile /app/justfile
+COPY requirements.txt /app/requirements.txt
 COPY LICENSE /app/LICENSE
+RUN pip install -r requirements.txt
 RUN mkdir /app/config
 ENTRYPOINT ["just", "-f", "/app/justfile"]

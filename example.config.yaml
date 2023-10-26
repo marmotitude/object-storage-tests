@@ -8,7 +8,7 @@ remotes:
   do-nyc3:
     s3:
       endpoint: https://nyc3.digitaloceanspaces.com
-      region: nyc3
+      region: us-east-1
       access_key: ""
       secret_key: ""
   local:
