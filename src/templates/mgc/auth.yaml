@@ -1,0 +1,8 @@
+{{range $remote_name, $remote := .remotes}}
+  {{ if $remote.mgc }}
+    {{ if eq $remote_name ($.current_remote | toString) }}
+access_key_id: {{ $remote.mgc.access_key }}
+secret_access_key: {{ $remote.mgc.secret_key }}
+    {{ end }}
+  {{ end }}
+{{ end }}
