@@ -40,7 +40,7 @@ export function presignPut({bucketName}){
 }
 
 export function listObject({bucketName}){
-  const list = (aws(s3Config, "s3", ["ls", `s3://${bucketName}/${testFileName}`]))
+  const list = aws(s3Config, "s3", ["ls", `s3://${bucketName}`])
   console.log(`List s3=${list}`)
   check(list, {"[List] response contains object name":l => l.includes(testFileName)})
 }
