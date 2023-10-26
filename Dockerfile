@@ -3,7 +3,8 @@ FROM grafana/xk6:0.9.2 as k6builder
 WORKDIR /app
 RUN xk6 build v0.43.1 \
       --with github.com/grafana/xk6-exec@v0.3.0 \
-      --with github.com/avitalique/xk6-file@v1.4.0
+      --with github.com/avitalique/xk6-file@v1.4.0 \
+      --with github.com/szkiba/xk6-yaml@latest
 
 # gotpl
 FROM alpine:3 as gotplbuilder
