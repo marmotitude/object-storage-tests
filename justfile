@@ -31,6 +31,7 @@ check-tools:
   aws --version
   rclone --version | head -n1
   swift --version
+  mgc --version
   openssl version
   gotpl version | head -n1
   dasel --version
@@ -133,8 +134,13 @@ __setup-aws:
   gotpl src/templates/aws/config -f {{config_file}} -o ~/.aws
   gotpl src/templates/aws/credentials -f {{config_file}} -o ~/.aws
 
+_setup-mgc:
+  @echo "writing ~/.config/mgc…"
+  @mkdir -p ~/.config/mgc
+  gotpl src/templates/mgc/auth.yaml -f {{config_file}} -o ~/.config/mgc
+
 # setup cli tools
-_setup: _setup-rclone _setup-aws
+_setup: _setup-rclone _setup-aws _setup-mgc
 
 # run k6 test with env vars
 _k6-run remote testname results_dir *args:

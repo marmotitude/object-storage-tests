@@ -1,3 +1,4 @@
+current_remote: "example-mgc"
 remotes:
   aws-east-1:
     s3:
@@ -9,6 +10,15 @@ remotes:
     s3:
       endpoint: https://nyc3.digitaloceanspaces.com
       region: us-east-1
+      access_key: ""
+      secret_key: ""
+  example-mgc:
+    s3:
+      endpoint: https://example.com
+      region: us-east-1
+      access_key: ""
+      secret_key: ""
+    mgc:
       access_key: ""
       secret_key: ""
   local:
