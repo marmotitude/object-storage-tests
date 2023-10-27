@@ -1,57 +1,91 @@
-import { check } from 'k6'
-import { crypto } from "k6/experimental/webcrypto"
+import { check, group } from 'k6'
 import { parse as yamlParse } from "k6/x/yaml";
+import { crypto } from "k6/experimental/webcrypto"
 import { aws } from "./utils/clis.js"
 import makeS3Client from "./utils/s3-client.js"
+import {bucketSetup, bucketTeardown} from "./utils/test-bucket.js"
+import tags from "./utils/tags.js"
 
-// k6LibBuckets init stage
+// init stage
 const testFileName = "LICENSE"
 const testFile = open(`../../${testFileName}`, "r");
 const config = yamlParse(open('../../config.yaml'));
 const s3Config = config.remotes[__ENV.AWS_CLI_PROFILE].s3
 const s3 = makeS3Client(config.remotes[__ENV.AWS_CLI_PROFILE].s3);
 
+// test stages
+export function setup(){
+  return bucketSetup(s3Config);
+}
+export function teardown(data){
+  return bucketTeardown(data);
+}
 export default async function scenarios(data) {
   await putObject(data)
   await abortMultipart(data)
 }
-export function setup(){
-  const bucketName = `test-k6-jslib-aws-${crypto.randomUUID()}`
-  console.log(aws(s3Config, "s3", ["mb", `s3://${bucketName}`]))
-  return {bucketName}
-}
-
-export function teardown({bucketName}) {
-    // delete bucket used by the tests
-    console.log(aws(s3Config, "s3", [ "rb",
-      `s3://${bucketName}`, "--force"
-    ]))
-  }
 
 export async function putObject({bucketName}) {
-  const testFileKey = `object_${crypto.randomUUID()}`
+  const testFileKey = `${testFileName}_${crypto.randomUUID()}`
+  let checkTags = {
+    feature: tags.features.PUT_OBJECT,
+    tool: tags.tools.LIB_JS_K6_AWS,
+    commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
+    command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_PUT_OBJECT,
+  };
   console.info(`uploading test file ${testFileKey} to bucket ${bucketName}`)
-  await s3.putObject(bucketName, testFileKey, testFile);
-  const obj = await s3.getObject(bucketName, testFileKey);
-  check(obj, {
-    'simple upload: test file have same size': o => o.size === testFile.length,
+  const putResult = await s3.putObject(bucketName, testFileKey, testFile);
+  const getResult = await s3.getObject(bucketName, testFileKey);
+  group(checkTags.commandSet, function(){
+    check(putResult, {
+      [checkTags.command]: r => r === undefined
+    }, checkTags)
+
+    checkTags = {
+      feature: tags.features.GET_OBJECT,
+      tool: tags.tools.LIB_JS_K6_AWS,
+      commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
+      command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_GET_OBJECT,
+    };
+    check(getResult, {
+      [checkTags.command]: o => o.size === testFile.length,
+    })
   })
 }
 
 export async function abortMultipart({bucketName}) {
-  const testFileKey = `object_${crypto.randomUUID()}`
+  const testFileKey = `${testFileName}_${crypto.randomUUID()}`
   console.info(`creating multipart upload of ${testFileKey} on bucket ${bucketName}...`)
-  let multipartUpload = undefined
+  let createMultipartUploadResult
+  let abortMultipartUploadResult = null // undefined is a success result, so we use null as unset
+  // XXX: this fails on some S3 implementations that dont support virtual-hosted-style URLs
   try {
-    // XXX: this fails on some S3 implementations that dont support virtual-hosted-style URLs
     // see https://github.com/grafana/k6-jslib-aws/issues/70 is fixed
-    multipartUpload = await s3.createMultipartUpload(bucketName, testFileKey);
-    check(multipartUpload, {
-      'multipart upload have uploadId': u => u && u.uploadId !== undefined,
-    })
+    createMultipartUploadResult = await s3.createMultipartUpload(bucketName, testFileKey);
     // abort multipart upload
-    await s3.abortMultipartUpload(bucketName, testFileKey, multipartUpload.uploadId);
+    abortMultipartUploadResult = await s3.abortMultipartUpload(
+      bucketName, testFileKey, createMultipartUploadResult.uploadId);
   } catch (e) {
-    console.error(e)
+    console.error(e.message)
   }
+  let checkTags = {
+    feature: tags.features.CREATE_MULTIPART,
+    tool: tags.tools.LIB_JS_K6_AWS,
+    commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
+    command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_CREATE_MULTIPART,
+  };
+  group(checkTags.commandSet, function(){
+    check(createMultipartUploadResult, {
+      [checkTags.command]: m => m && m.uploadId !== undefined,
+    })
+
+    checkTags = {
+      feature: tags.features.ABORT_MULTIPART,
+      tool: tags.tools.LIB_JS_K6_AWS,
+      commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
+      command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_ABORT_MULTIPART,
+    };
+    check(abortMultipartUploadResult, {
+      [checkTags.command]: a => a === undefined })
+  })
 }
