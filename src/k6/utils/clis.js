@@ -23,3 +23,13 @@ export function swift({auth, user, key}={}, cmdName, args=[]){
     ...args,
   ])
 }
+
+export function mgc({region}, command, subCommand, args=[]){
+  return exec.command("mgc", [
+    "object-storage",
+    command,
+    subCommand,
+    "--region", region,
+    ...args,
+  ])
+}
