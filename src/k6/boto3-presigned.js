@@ -1,46 +1,68 @@
-import { check, fail } from 'k6'
+import { check, group, fail } from 'k6'
 import http from 'k6/http';
-import { crypto } from "k6/experimental/webcrypto"
 import exec from 'k6/x/exec';
 import { parse as yamlParse } from "k6/x/yaml";
+import { crypto } from "k6/experimental/webcrypto"
+import {bucketSetup, bucketTeardown} from "./utils/test-bucket.js"
+import tags from "./utils/tags.js"
 import { aws } from './utils/index.js'
 
+// init stage
 const config = yamlParse(open('../../config.yaml'));
 const s3Config = config.remotes[__ENV.AWS_CLI_PROFILE].s3
 const testFileName = "LICENSE"
 const testFile = open(`../../${testFileName}`, "r");
 
-
-export function setup() {
-    const bucketName = `test-aws-cli-${crypto.randomUUID()}`
-    console.log(aws(s3Config, "s3", ["mb", `s3://${bucketName}`]))
-    return {bucketName}
+// test stages
+export function setup(){
+  return bucketSetup(s3Config);
 }
-
+export function teardown(data){
+  return bucketTeardown(data);
+}
 export default function scenarios (data){
-    presignPut(data)
-    listObject(data)
+  presignPut(data)
 }
-
-export function teardown({bucketName}) {
-    // delete bucket used by the tests
-    console.log(aws(s3Config, "s3", [ "rb",
-      `s3://${bucketName}`, "--force"
-    ]))
-  }
 
 export function presignPut({bucketName}){
-    const url = exec.command('./src/boto3/presign.py',[__ENV.AWS_CLI_PROFILE, 'generate-put-url', bucketName, testFileName])
-    console.log(url)
-    check(url, {"[presign.py] Pre-signed PUT URL contains query parameter X-Amz-Signature": u => u.includes("X-Amz-Signature=")})
-    const res = http.put(url.trim(), testFile)
-  console.log(`PUT response=${res.body}`)
-  console.log(`PUT response status =${res.status}`)
-  check(res.status, {"[upload] PUT response have status 200": s => s === 200 })
-}
+  const url = exec.command('./src/boto3/presign.py',[
+    __ENV.AWS_CLI_PROFILE, 'generate-put-url', bucketName, testFileName])
+  console.log(url)
+  let checkTags = {
+    feature: tags.features.CREATE_PRESIGN_PUT_URL,
+    tool: tags.tools.LIB_PYTHON_BOTO3,
+    commandSet: tags.commandSets.LIB_PYTHON_BOTO3_CLIENT,
+    command: tags.commands.LIB_PYTHON_BOTO3_CLIENT_GENERATE_PRESIGNED_URL,
+  }
+  group(checkTags.feature, function(){
+    check(url, {
+      [`${checkTags.command}`]: u => u.includes("X-Amz-Signature=") }, checkTags)
+  })
 
-export function listObject({bucketName}){
-  const list = aws(s3Config, "s3", ["ls", `s3://${bucketName}`])
-  console.log(`List s3=${list}`)
-  check(list, {"[List] response contains object name":l => l.includes(testFileName)})
+  const res = http.put(url.trim(), testFile)
+  console.log(`PUT response status =${res.status}`)
+  checkTags = {
+    feature: tags.features.PUT_OBJECT_PRESIGNED,
+    tool: tags.tools.HTTP,
+    commandSet: tags.commandSets.HTTP_PUT,
+    command: tags.commands.HTTP_PUT_OBJECT,
+  }
+  group(checkTags.feature, function(){
+    check(res.status, {
+      [`${checkTags.command}`]: s => s === 200 }, checkTags)
+
+    if (res.status !== 200) {
+      fail(`${checkTags.feature} failed`)
+    }
+    const list = aws(s3Config, "s3", ["ls", `s3://${bucketName}`])
+    console.log(`s3 ls = ${list}`)
+    checkTags = {
+      feature: tags.features.LIST_BUCKET_OBJECTS,
+      tool: tags.tools.CLI_AWS,
+      commandSet: tags.commandSets.CLI_AWS_S3,
+      command: tags.commands.CLI_AWS_S3_LS,
+    }
+    check(list, {
+      [`${checkTags.command} contains uploaded object`]:l => l.includes(testFileName)}, checkTags)
+    })
 }
