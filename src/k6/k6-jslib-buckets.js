@@ -1,40 +1,52 @@
-import { check, fail } from 'k6'
-import { crypto } from "k6/experimental/webcrypto"
+import { check, group } from 'k6'
 import { parse as yamlParse } from "k6/x/yaml";
 import makeS3Client from "./utils/s3-client.js"
-import { aws } from "./utils/clis.js"
+import {bucketSetup, bucketTeardown} from "./utils/test-bucket.js"
+import tags from "./utils/tags.js"
 
-// k6LibBuckets init stage
+// init stage
 const config = yamlParse(open('../../config.yaml'));
 const s3Config = config.remotes[__ENV.AWS_CLI_PROFILE].s3
 const s3 = makeS3Client(config.remotes[__ENV.AWS_CLI_PROFILE].s3);
 
-export function setup() {
-  const bucketName = `test-k6-jslib-aws-${crypto.randomUUID()}`
-  console.log(aws(s3Config, "s3", ["mb", `s3://${bucketName}`]))
-  return {bucketName}
+// test stages
+export function setup(){
+  return bucketSetup(s3Config);
 }
-
+export function teardown(data){
+  return bucketTeardown(data);
+}
 export default async function({bucketName}){
-  const SWIFT_BUG_1856938_DATE = 1233679509000 //2009-02-03T16:45:09.000Z
+  let checkTags;
   const buckets = await s3.listBuckets()
-  console.log(`buckets list =${JSON.stringify(buckets)}`)
-  check(buckets, {
-    'list is array': (buckets) => Array.isArray(buckets),
-    'list contains test bucket': (buckets) => buckets.map(b => b.name).includes(bucketName),
+  checkTags = {
+    feature: tags.features.LIST_BUCKETS,
+    tool: tags.tools.LIB_JS_K6_AWS,
+    commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
+    command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_LIST_BUCKETS,
+  }
+  group(checkTags.command, function(){
+    console.log(`buckets list =${JSON.stringify(buckets)}`)
+    check(buckets, {
+      [`${checkTags.feature} is array`]: b => Array.isArray(b),
+      [`${checkTags.feature} contains test bucket`]: b => {
+          const names = b.map(i => i.name);
+          return names.includes(bucketName)
+      },
+    }, checkTags)
   })
 
-  console.log(`test bucket name is ${bucketName}`)
-  const testBuckets = buckets.filter(b => b.name === bucketName)
-  check(testBuckets, {
-    'test bucket have date different than Swift Bug #1856938': t => t[0].creationDate !== SWIFT_BUG_1856938_DATE,
-    'test bucket have date newer than 2009': t => new Date(t[0].creationDate).getUTCFullYear() > 2009 ,
+  checkTags = {
+    feature: tags.features.BUCKET_INFO_CREATION_DATE,
+    fix: tags.fixes.CREATION_DATE_2009_02_03,
+  };
+  group(checkTags.fix, function(){
+    const SWIFT_BUG_1856938_DATE = 1233679509000 //2009-02-03T16:45:09.000Z
+    const testBucket = buckets.find(b => b.name === bucketName)
+    check(testBucket, {
+      [`${checkTags.feature} different than fixed date`]: b => b.creationDate !== SWIFT_BUG_1856938_DATE,
+      [`${checkTags.feature} newer than 2009`]: b => new Date(b.creationDate).getUTCFullYear() > 2009 ,
+    }, checkTags)
   })
 }
 
-export function teardown({bucketName}) {
-    // delete bucket used by the tests
-    console.log(aws(s3Config, "s3", [ "rb",
-      `s3://${bucketName}`, "--force"
-    ]))
-  }
