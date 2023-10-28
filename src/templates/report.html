@@ -1,0 +1,33 @@
+<h1>Checks from {{ printf "%.16s" .period.begin }} to {{ printf "%.16s" .period.end }}</h1>
+{{range $i,$tag := .tags_order}}
+<section>
+  <h2>{{index $.section_titles $i}}</h2>
+  <table border="1">
+    <thead>
+      <tr>
+        <th rowspan=2>{{ $tag }}</th>
+        <th colspan="{{ len $.remotes }}">Success Count</th>
+      </tr>
+      <tr>
+        {{range $.remotes}}
+          <th>{{.}}</th>
+        {{end}}
+      </tr>
+    </thead>
+    <tbody>
+      {{range $name, $remotes := index $.tags $tag}}
+        <tr>
+          <td>{{$name}}</td>
+          {{range $.remotes}}
+            {{with index $remotes .}}
+              <td>{{.success}}/{{.total}}</td>
+            {{else}}
+              <td>-</td>
+            {{end}}
+          {{end}}
+        </tr>
+      {{end}}
+    </tbody>
+  </table>
+</section>
+{{end}}
