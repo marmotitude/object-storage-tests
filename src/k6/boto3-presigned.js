@@ -31,7 +31,6 @@ export function presignPut({bucketName}){
   let checkTags = {
     feature: tags.features.CREATE_PRESIGN_PUT_URL,
     tool: tags.tools.LIB_PYTHON_BOTO3,
-    commandSet: tags.commandSets.LIB_PYTHON_BOTO3_CLIENT,
     command: tags.commands.LIB_PYTHON_BOTO3_CLIENT_GENERATE_PRESIGNED_URL,
   }
   group(checkTags.feature, function(){
@@ -44,7 +43,6 @@ export function presignPut({bucketName}){
   checkTags = {
     feature: tags.features.PUT_OBJECT_PRESIGNED,
     tool: tags.tools.HTTP,
-    commandSet: tags.commandSets.HTTP_PUT,
     command: tags.commands.HTTP_PUT_OBJECT,
   }
   group(checkTags.feature, function(){
@@ -59,7 +57,6 @@ export function presignPut({bucketName}){
     checkTags = {
       feature: tags.features.LIST_BUCKET_OBJECTS,
       tool: tags.tools.CLI_AWS,
-      commandSet: tags.commandSets.CLI_AWS_S3,
       command: tags.commands.CLI_AWS_S3_LS,
     }
     check(list, {
