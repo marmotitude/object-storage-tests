@@ -22,7 +22,6 @@ export default async function({bucketName}){
   checkTags = {
     feature: tags.features.LIST_BUCKETS,
     tool: tags.tools.LIB_JS_K6_AWS,
-    commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
     command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_LIST_BUCKETS,
   }
   group(checkTags.command, function(){

@@ -30,13 +30,12 @@ export async function putObject({bucketName}) {
   let checkTags = {
     feature: tags.features.PUT_OBJECT,
     tool: tags.tools.LIB_JS_K6_AWS,
-    commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
     command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_PUT_OBJECT,
   };
   console.info(`uploading test file ${testFileKey} to bucket ${bucketName}`)
   const putResult = await s3.putObject(bucketName, testFileKey, testFile);
   const getResult = await s3.getObject(bucketName, testFileKey);
-  group(checkTags.commandSet, function(){
+  group(checkTags.feature, function(){
     check(putResult, {
       [checkTags.command]: r => r === undefined
     }, checkTags)
@@ -44,7 +43,6 @@ export async function putObject({bucketName}) {
     checkTags = {
       feature: tags.features.GET_OBJECT,
       tool: tags.tools.LIB_JS_K6_AWS,
-      commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
       command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_GET_OBJECT,
     };
     check(getResult, {
@@ -71,10 +69,9 @@ export async function abortMultipart({bucketName}) {
   let checkTags = {
     feature: tags.features.CREATE_MULTIPART,
     tool: tags.tools.LIB_JS_K6_AWS,
-    commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
     command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_CREATE_MULTIPART,
   };
-  group(checkTags.commandSet, function(){
+  group(checkTags.feature, function(){
     check(createMultipartUploadResult, {
       [checkTags.command]: m => m && m.uploadId !== undefined,
     })
@@ -82,7 +79,6 @@ export async function abortMultipart({bucketName}) {
     checkTags = {
       feature: tags.features.ABORT_MULTIPART,
       tool: tags.tools.LIB_JS_K6_AWS,
-      commandSet: tags.commandSets.LIB_JS_K6_AWS_S3CLIENT,
       command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_ABORT_MULTIPART,
     };
     check(abortMultipartUploadResult, {

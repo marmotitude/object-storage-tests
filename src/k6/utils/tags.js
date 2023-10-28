@@ -30,12 +30,6 @@ const tags = {
     LIB_PYTHON_BOTO3: "boto3",
     LIB_JS_K6_AWS: "k6-jslib-aws",
   },
-  commandSets: {
-    HTTP_PUT: "http PUT",
-    CLI_AWS_S3: "aws s3",
-    LIB_JS_K6_AWS_S3CLIENT: "k6-jslib-aws S3Client",
-    LIB_PYTHON_BOTO3_CLIENT: "boto3 client",
-  },
   commands: {
     CLI_AWS_S3_MB: "aws s3 mb",
     CLI_AWS_S3_RB: "aws s3 rb",

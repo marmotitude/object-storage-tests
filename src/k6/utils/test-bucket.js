@@ -10,7 +10,6 @@ export function bucketSetup(s3Config) {
   const checkTags = {
     feature: tags.features.CREATE_BUCKET,
     tool: tags.tools.CLI_AWS,
-    commandSet: tags.commandSets.CLI_AWS_S3,
     command: tags.commands.CLI_AWS_S3_MB,
   }
   check(createBucketResult, {
@@ -29,7 +28,6 @@ export function bucketTeardown({s3Config, bucketName}) {
   const checkTags = {
     feature: tags.features.PURGE_BUCKET,
     tool: tags.tools.CLI_AWS,
-    commandSet: tags.commandSets.CLI_AWS_S3,
     command: tags.commands.CLI_AWS_S3_RB,
   }
   check(purgeBucketResult, {
