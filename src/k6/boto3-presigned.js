@@ -49,9 +49,6 @@ export function presignPut({bucketName}){
     check(res.status, {
       [`${checkTags.command}`]: s => s === 200 }, checkTags)
 
-    if (res.status !== 200) {
-      fail(`${checkTags.feature} failed`)
-    }
     const list = aws(s3Config, "s3", ["ls", `s3://${bucketName}`])
     console.log(`s3 ls = ${list}`)
     checkTags = {

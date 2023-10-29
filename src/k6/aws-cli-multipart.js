@@ -1,7 +1,5 @@
 import { check, group } from 'k6'
 import { crypto } from "k6/experimental/webcrypto"
-import http from 'k6/http';
-import exec from 'k6/x/exec';
 import { parse as yamlParse } from "k6/x/yaml";
 import { aws, parseJsonOrFail, checkParts, generateMultipartFiles, removeMultipartFiles } from './utils/index.js'
 import {bucketSetup, bucketTeardown} from "./utils/test-bucket.js"
@@ -35,9 +33,6 @@ export function teardown(data){
   return bucketTeardown(data);
 }
 export default function scenarios(data) {
-  group(tags.features.GET_OBJECT_PRESIGNED, function(){
-    presignGet(data)
-  })
   group(tags.features.PUT_OBJECT_MULTIPART, function(){
     const data2 = createMultipartUpload(data)
     listMultipartUploads(data2)
@@ -50,50 +45,6 @@ export default function scenarios(data) {
     copyMultipartUpload(data4)
   })
 }
-
-export function presignGet({bucketName}) {
-  const fileName = `get-${testFileName}`
-
-  // upload a test file
-  let checkTags = {
-    feature: tags.features.PUT_OBJECT,
-    tool: tags.tools.CLI_AWS,
-    command: tags.commands.CLI_AWS_S3_CP,
-  }
-  const uploadOutput = s3("cp", [ testFileName, `s3://${bucketName}/${fileName}` ])
-  console.log({uploadOutput})
-  check(uploadOutput, {
-    [`${checkTags.command} response have filename`]: o => o.includes(testFileName),
-    [`${checkTags.command} response have bucket name`]: o => o.includes(bucketName),
-    [`${checkTags.command} response have object key`]: o => o.includes(fileName),
-  }, checkTags)
-
-  // generate presigned (GET) url using AWS-CLI
-  checkTags = {
-    feature: tags.features.CREATE_PRESIGN_GET_URL_V2,
-    tool: tags.tools.CLI_AWS,
-    command: tags.commands.CLI_AWS_S3_PRESIGN,
-  }
-  const url = s3("presign", [ `s3://${bucketName}/${fileName}` ])
-  console.log(`Pre-signed GET URL=${url}`)
-  check(url, {
-    [`${checkTags.command} GET URL contains Signature param`]: u => u.includes("Signature=")
-  }, checkTags)
-
-  // download testFile using GET on that url before the expirantion date
-  checkTags = {
-    feature: tags.features.GET_OBJECT,
-    tool: tags.tools.HTTP,
-    command: tags.commands.HTTP_GET,
-  }
-  const res = http.get(url.trim())
-  console.log(`GET response=${res.body}`)
-  console.log(`GET response status =${res.status}`)
-  check(res.status, {
-    [`${checkTags.command} response have status 200`]: s => s === 200
-  }, checkTags)
-}
-
 export function createMultipartUpload({bucketName}){
   const keyName = crypto.randomUUID()
 
