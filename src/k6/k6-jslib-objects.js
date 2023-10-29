@@ -51,7 +51,7 @@ export async function putAndGetObject({bucketName}) {
   group(tags.features.GET_OBJECT, function(){
     check(getResult, {
       [checkTags.command]: o => o.size === testFile.length,
-    })
+    }, checkTags)
   })
 }
 
@@ -78,7 +78,7 @@ export async function abortMultipart({bucketName}) {
   group(checkTags.feature, function(){
     check(createMultipartUploadResult, {
       [checkTags.command]: m => m && m.uploadId !== undefined,
-    })
+    }, checkTags)
 
     checkTags = {
       feature: tags.features.ABORT_MULTIPART,
@@ -86,6 +86,6 @@ export async function abortMultipart({bucketName}) {
       command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_ABORT_MULTIPART,
     };
     check(abortMultipartUploadResult, {
-      [checkTags.command]: a => a === undefined })
+      [checkTags.command]: a => a === undefined }, checkTags)
   })
 }
