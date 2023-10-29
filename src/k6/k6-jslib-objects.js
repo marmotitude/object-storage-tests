@@ -21,11 +21,13 @@ export function teardown(data){
   return bucketTeardown(data);
 }
 export default async function scenarios(data) {
-  await putObject(data)
-  await abortMultipart(data)
+  await putAndGetObject(data)
+  group(tags.features.PUT_OBJECT_MULTIPART, function(){
+    abortMultipart(data)
+  })
 }
 
-export async function putObject({bucketName}) {
+export async function putAndGetObject({bucketName}) {
   const testFileKey = `${testFileName}_${crypto.randomUUID()}`
   let checkTags = {
     feature: tags.features.PUT_OBJECT,
@@ -34,17 +36,19 @@ export async function putObject({bucketName}) {
   };
   console.info(`uploading test file ${testFileKey} to bucket ${bucketName}`)
   const putResult = await s3.putObject(bucketName, testFileKey, testFile);
-  const getResult = await s3.getObject(bucketName, testFileKey);
-  group(checkTags.feature, function(){
+  group(tags.features.PUT_OBJECT, function(){
     check(putResult, {
       [checkTags.command]: r => r === undefined
     }, checkTags)
+  })
 
-    checkTags = {
-      feature: tags.features.GET_OBJECT,
-      tool: tags.tools.LIB_JS_K6_AWS,
-      command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_GET_OBJECT,
-    };
+  checkTags = {
+    feature: tags.features.GET_OBJECT,
+    tool: tags.tools.LIB_JS_K6_AWS,
+    command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_GET_OBJECT,
+  };
+  const getResult = await s3.getObject(bucketName, testFileKey);
+  group(tags.features.GET_OBJECT, function(){
     check(getResult, {
       [checkTags.command]: o => o.size === testFile.length,
     })
@@ -67,7 +71,7 @@ export async function abortMultipart({bucketName}) {
     console.error(e.message)
   }
   let checkTags = {
-    feature: tags.features.CREATE_MULTIPART,
+    feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.LIB_JS_K6_AWS,
     command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_CREATE_MULTIPART,
   };
