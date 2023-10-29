@@ -43,7 +43,7 @@ export function presignPut({bucketName}){
   checkTags = {
     feature: tags.features.PUT_OBJECT_PRESIGNED,
     tool: tags.tools.HTTP,
-    command: tags.commands.HTTP_PUT_OBJECT,
+    command: tags.commands.HTTP_PUT,
   }
   group(checkTags.feature, function(){
     check(res.status, {
