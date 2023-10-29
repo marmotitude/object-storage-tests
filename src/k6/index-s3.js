@@ -12,10 +12,15 @@ import {
   teardown as k6JsLibObjectsTeardown,
 } from "./k6-jslib-objects.js";
 import {
-  default as awsCliTest,
-  setup as awsCliSetup,
-  teardown as awsCliTeardown,
-} from "./aws-cli-objects.js";
+  default as awsCliMultipartTest,
+  setup as awsCliMultipartSetup,
+  teardown as awsCliMultipartTeardown,
+} from "./aws-cli-multipart.js";
+import {
+  default as awsCliPresignTest,
+  setup as awsCliPresignSetup,
+  teardown as awsCliPresignTeardown,
+} from "./aws-cli-presigned.js";
 import {
   default as boto3Test,
   setup as boto3Setup,
@@ -40,8 +45,11 @@ export function setup() {
   describe("Setup k6-jslib-aws objects test", (_t) => {
     setupData.k6JsLibObjectsData = k6JsLibObjectsSetup();
   });
-  describe("Setup aws-cli tests", (_t) => {
-    setupData.awsCliData = awsCliSetup();
+  describe("Setup aws-cli multipart tests", (_t) => {
+    setupData.awsCliMultipartData = awsCliMultipartSetup();
+  });
+  describe("Setup aws-cli presign tests", (_t) => {
+    setupData.awsCliPresignData = awsCliPresignSetup();
   });
   describe("Setup boto3 test", (_t) => {
     setupData.boto3Data = boto3Setup();
@@ -51,7 +59,8 @@ export function setup() {
 export default function ({
   k6JsLibBucketsData,
   k6JsLibObjectsData,
-  awsCliData,
+  awsCliMultipartData,
+  awsCliPresignData,
   boto3Data,
 }) {
   describe("Run k6-jslib-aws buckets test", async (_t) => {
@@ -60,18 +69,22 @@ export default function ({
   describe("Run k6-jslib-aws objects test", async (_t) => {
     await k6JsLibObjectsTest(k6JsLibObjectsData);
   });
-  describe("Run aws-cli tests", (_t) => {
-    awsCliTest(awsCliData);
+  describe("Run aws-cli multipart tests", (_t) => {
+    awsCliMultipartTest(awsCliMultipartData);
   });
-    describe("Run boto3 presign test", (_t) => {
-      boto3Test(boto3Data);
-    });
+  describe("Run aws-cli presign tests", (_t) => {
+    awsCliPresignTest(awsCliPresignData);
+  });
+  describe("Run boto3 presign test", (_t) => {
+    boto3Test(boto3Data);
+  });
 }
 
 export function teardown({
   k6JsLibBucketsData,
   k6JsLibObjectsData,
-  awsCliData,
+  awsCliMultipartData,
+  awsCliPresignData,
   boto3Data,
 }) {
   describe("Teardown k6-jslib-aws objects test", (_t) => {
@@ -80,8 +93,11 @@ export function teardown({
   describe("Teardown k6-jslib-aws buckets test", (_t) => {
     k6JsLibBucketsTeardown(k6JsLibBucketsData);
   });
-  describe("Teardown aws-cli tests", (_t) => {
-    awsCliTeardown(awsCliData);
+  describe("Teardown aws-cli multipart tests", (_t) => {
+    awsCliMultipartTeardown(awsCliMultipartData);
+  });
+  describe("Teardown aws-cli presign tests", (_t) => {
+    awsCliPresignTeardown(awsCliPresignData);
   });
   describe("Teardown boto3 presign test", (_t) => {
      boto3Teardown(boto3Data);
