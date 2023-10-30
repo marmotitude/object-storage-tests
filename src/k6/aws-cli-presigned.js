@@ -41,7 +41,6 @@ export function presignGet({bucketName}) {
 
   // generate presigned (GET) url using AWS-CLI
   checkTags = {
-    feature: tags.features.CREATE_PRESIGN_GET_URL_V2,
     tool: tags.tools.CLI_AWS,
     command: tags.commands.CLI_AWS_S3_PRESIGN,
   }
@@ -53,8 +52,8 @@ export function presignGet({bucketName}) {
 
   // download testFile using GET on that url before the expirantion date
   checkTags = {
-    feature: tags.features.GET_OBJECT,
     tool: tags.tools.HTTP,
+    feature: tags.features.GET_OBJECT_PRESIGNED_V2,
     command: tags.commands.HTTP_GET,
   }
   const res = http.get(url.trim())
