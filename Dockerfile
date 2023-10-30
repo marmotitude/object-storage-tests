@@ -20,17 +20,20 @@ RUN apk update && \
 COPY --from=k6builder /app/k6 /usr/bin/k6
 COPY --from=gotplbuilder /app/gotpl /usr/bin/gotpl
 
-# Install swift-cli
+# Python pip
 ENV PIP_ROOT_USER_ACTION=ignore
 RUN apk add python3 py3-pip py3-netifaces
-RUN pip install python-swiftclient
-RUN pip install python-keystoneclient
+RUN pip install --upgrade --no-cache-dir pip
+
+# Install swift-cli
+RUN pip install --no-cache-dir python-swiftclient
+RUN pip install --no-cache-dir python-keystoneclient
 
 WORKDIR /app
 COPY src /app/src
 COPY justfile /app/justfile
 COPY requirements.txt /app/requirements.txt
 COPY LICENSE /app/LICENSE
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir --no-dependencies -r requirements.txt
 RUN mkdir /app/config
 ENTRYPOINT ["just", "-f", "/app/justfile"]
