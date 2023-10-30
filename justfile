@@ -2,6 +2,7 @@
 #------------------------
 date := `date +%Y%m%d-%H%M%S`
 config_file := env_var_or_default("CONFIG_PATH", "./") + "config.yaml"
+results_prefix := "results"
 rclone_conf_exists := path_exists(env_var("HOME") + "/.config/rclone")
 aws_conf_exists := path_exists(env_var("HOME") + "/.aws")
 
@@ -118,14 +119,12 @@ _k6-run remote testname results_dir *args:
     --console-output="{{results_dir}}/k6-{{testname}}.console.log" \
     {{args}} 2>&1 | tee "{{results_dir}}/k6-{{testname}}.log"
 
-__test-k6 remote test_name results_dir:
-  #!/usr/bin/env sh
-  # create local folder for storing results
-  mkdir -p {{results_dir}}
-  just _k6-run {{remote}} {{test_name}} {{results_dir}}
-
 _test-k6 remote test_name timestamp:
-  @just __test-k6 {{remote}} {{test_name}} {{results_prefix}}/{{remote}}/{{timestamp}}
+  #!/usr/bin/env sh
+  results_dir={{results_prefix}}/{{remote}}/{{timestamp}}
+  # create local folder for storing results
+  mkdir -p $results_dir
+  just _k6-run {{remote}} {{test_name}} $results_dir
 
 
 #------------------
@@ -141,7 +140,6 @@ s3api_test_bucket := "test-aws-cli-s3api-"
 
 # rclone
 test_dir := "test-rclone-"
-results_prefix := "results"
 rclone_conf := "~/.config/rclone/rclone.conf"
 # https://rclone.org/commands/rclone_test_makefiles/
 rclone_files_count := "50"
