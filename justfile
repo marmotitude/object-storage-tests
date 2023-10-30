@@ -48,8 +48,35 @@ list-tests:
     | sed "s/\.js//g"
 
 # Test a S3-compatible provider with k6
-test remote test_name="index-s3": _setup-rclone _setup-aws
+test remote test_name="index-s3": _setup
   @just _test-k6 {{remote}} {{test_name}} {{date}}
+
+# Run the same test on multiple remotes
+group-test test_name group_name +remotes: _setup
+  #!/usr/bin/env sh
+  results_dir={{results_prefix}}/{{group_name}}/{{date}}
+  past_minutes=10
+  echo $results_dir
+  mkdir -p $results_dir
+  # TODO: do we want to parallelize?
+  # parallel_processes=2
+  # printf "%s\0" {{remotes}} | xargs -0 -I @ -P $parallel_processes just test @ {{test_name}}
+  for remote in {{remotes}}; do
+    just test $remote {{test_name}}
+  done
+  # Group all json files of remotes dirs, from the past 10 minutes, into a single one
+  cd {{results_prefix}}
+  echo concatenating the following results:
+  find {{remotes}} -mmin -$past_minutes -name "*.json" | sort -r
+  find {{remotes}} -mmin -$past_minutes -name "*.json" | sort -r | xargs cat > {{group_name}}/{{date}}/results.json
+  cd ..
+  results_json_file={{results_prefix}}/{{group_name}}/{{date}}/results.json
+  results_yaml_file={{results_prefix}}/{{group_name}}/{{date}}/results.yaml
+  results_html_file={{results_prefix}}/{{group_name}}/{{date}}/report.html
+  ./src/tag-report.py $results_json_file > $results_yaml_file
+  gotpl src/templates/report.html -f $results_yaml_file -o $results_dir
+  echo results saved to $results_json_file, $results_yaml_file and $results_html_file
+
 
 # Run main docker image
 run *args:
