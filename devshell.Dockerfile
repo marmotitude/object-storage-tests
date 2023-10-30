@@ -4,7 +4,7 @@ RUN apk add \
       aws-cli-doc \
       rclone-doc rclone-fish-completion \
       openssh openssh-doc \
-      vim vim-doc \
+      gvim vim-doc \
       git git-doc \
       fish fish-doc \
       ripgrep ripgrep-doc ripgrep-fish-completion \
