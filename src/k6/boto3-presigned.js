@@ -29,7 +29,6 @@ export function presignPut({bucketName}){
     __ENV.AWS_CLI_PROFILE, 'generate-put-url', bucketName, testFileName])
   console.log(url)
   let checkTags = {
-    feature: tags.features.CREATE_PRESIGN_PUT_URL,
     tool: tags.tools.LIB_PYTHON_BOTO3,
     command: tags.commands.LIB_PYTHON_BOTO3_CLIENT_GENERATE_PRESIGNED_URL,
   }
@@ -49,14 +48,23 @@ export function presignPut({bucketName}){
     check(res.status, {
       [`${checkTags.command}`]: s => s === 200 }, checkTags)
 
-    const list = aws(s3Config, "s3", ["ls", `s3://${bucketName}`])
-    console.log(`s3 ls = ${list}`)
+    let lsOutput = aws(s3Config, "s3", ["ls", `s3://${bucketName}`])
+    console.log(`s3 ls = ${lsOutput}`)
+    let command = tags.commands.CLI_AWS_S3_LS
     checkTags = {
       feature: tags.features.LIST_BUCKET_OBJECTS,
       tool: tags.tools.CLI_AWS,
-      command: tags.commands.CLI_AWS_S3_LS,
+      command,
     }
-    check(list, {
-      [`${checkTags.command} contains uploaded object`]:l => l.includes(testFileName)}, checkTags)
-    })
+    check(lsOutput, {
+      [`${command}`]: l => l !== undefined
+    }, checkTags)
+
+    checkTags = {
+      feature: tags.features.PUT_OBJECT_PRESIGNED,
+    }
+    check(lsOutput, {
+      [`${command} contains uploaded object`]: l => l.includes(testFileName)
+    }, checkTags)
+  })
 }
