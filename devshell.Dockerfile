@@ -1,6 +1,7 @@
 FROM fczuardi/object-storage-tests:latest
 RUN apk add \
       mandoc mandoc-doc \
+      aws-cli-doc \
       rclone-doc rclone-fish-completion \
       openssh openssh-doc \
       vim vim-doc \
