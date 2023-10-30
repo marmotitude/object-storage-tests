@@ -13,6 +13,7 @@ const tags = {
     GET_OBJECT: "get object",
     PUT_OBJECT_PRESIGNED: "put object (presigned)",
     GET_OBJECT_PRESIGNED: "get object (presigned)",
+    GET_OBJECT_PRESIGNED_V2: "get object (presigned v2)",
 
     // multipart objects
     CREATE_MULTIPART_UPLOAD: "start multipart upload",
@@ -26,7 +27,6 @@ const tags = {
     CREATE_PRESIGN_PUT_URL: "create v4 presign upload URL",
     CREATE_PRESIGN_GET_URL: "create v4 presign download URL",
     CREATE_PRESIGN_PUT_URL_V2: "create v2 presign upload URL",
-    CREATE_PRESIGN_GET_URL_V2: "create v2 presign download URL",
   },
   tools: {
     CLI_AWS: "aws cli",
