@@ -35,14 +35,14 @@ export function teardown(data){
 export default function scenarios(data) {
   group(tags.features.PUT_OBJECT_MULTIPART, function(){
     const data2 = createMultipartUpload(data)
-    listMultipartUploads(data2)
-    abortMultipartUpload(data2)
+    data2 && listMultipartUploads(data2)
+    data2 && abortMultipartUpload(data2)
 
     const data3 = createMultipartUpload(data)
-    completeMultipartUpload(data3)
+    data3 && completeMultipartUpload(data3)
 
     const data4 = createMultipartUpload(data)
-    copyMultipartUpload(data4)
+    data4 && copyMultipartUpload(data4)
   })
 }
 export function createMultipartUpload({bucketName}){
@@ -50,18 +50,21 @@ export function createMultipartUpload({bucketName}){
 
   // create the multipart upload
   let checkTags = {
-    feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.CLI_AWS,
+    feature: tags.features.CREATE_MULTIPART_UPLOAD,
     command: tags.commands.CLI_AWS_S3API_CREATE_MULTIPART,
   }
   let stdOut = s3api("create-multipart-upload", bucketName, [
     "--key", keyName
   ])
   console.info("Create Output", stdOut)
+  check(stdOut, {
+    [`${checkTags.command}`]: o => o.includes("UploadId"),
+  }, checkTags)
   let parsedResult = parseJsonOrFail(stdOut)
   const uploadId = parsedResult.UploadId 
   check(uploadId, {
-    [`${checkTags.command} have UploadId`]: id => id !== undefined,
+    [`${checkTags.command}`]: id => id !== undefined,
   }, checkTags)
 
   return {bucketName, keyName, uploadId}
@@ -69,8 +72,8 @@ export function createMultipartUpload({bucketName}){
 function listMultipartUploads({bucketName, keyName, uploadId}) {
   // list multipart uploads
   const checkTags = {
-    feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.CLI_AWS,
+    feature: tags.features.LIST_MULTIPART_UPLOADS,
     command: tags.commands.CLI_AWS_S3API_LIST_MULTIPART,
   }
   const stdOut = s3api("list-multipart-uploads", bucketName, [])
@@ -86,8 +89,8 @@ function listMultipartUploads({bucketName, keyName, uploadId}) {
 function abortMultipartUpload({bucketName, keyName, uploadId}) {
   // abort the multipart upload
   const checkTags = {
-    feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.CLI_AWS,
+    feature: tags.features.ABORT_MULTIPART_UPLOAD,
     command: tags.commands.CLI_AWS_S3API_ABORT_MULTIPART,
   }
   const stdOut = s3api("abort-multipart-upload", bucketName, [
@@ -108,8 +111,8 @@ function completeMultipartUpload({bucketName, keyName, uploadId}) {
   let etags = []
   let stdOut
   let checkTags = {
-    feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.CLI_AWS,
+    feature: tags.features.UPLOAD_MULTIPART_PART,
     command: tags.commands.CLI_AWS_S3API_UPLOAD_PART,
   }
   chunks.forEach(chunk => {
@@ -128,8 +131,8 @@ function completeMultipartUpload({bucketName, keyName, uploadId}) {
 
   // list uploaded parts
   checkTags = {
-    feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.CLI_AWS,
+    feature: tags.features.LIST_MULTIPART_UPLOAD_PARTS,
     command: tags.commands.CLI_AWS_S3API_LIST_PARTS,
   }
   stdOut = s3api("list-parts", bucketName, [
@@ -137,6 +140,9 @@ function completeMultipartUpload({bucketName, keyName, uploadId}) {
     "--upload-id", uploadId
   ])
   console.info("List parts Output:", stdOut)
+  check(stdOut, {
+    [`${checkTags.command}`]: o => o.includes("Parts"),
+  }, checkTags)
   let parts = parseJsonOrFail(stdOut).Parts
   check(stdOut, {
     [`${checkTags.command} has all Etags`]: s => checkParts(parts, etags)
@@ -147,8 +153,8 @@ function completeMultipartUpload({bucketName, keyName, uploadId}) {
     return {"PartNumber": p.PartNumber, "ETag": p.ETag}
   })
   checkTags = {
-    feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.CLI_AWS,
+    feature: tags.features.PUT_OBJECT_MULTIPART,
     command: tags.commands.CLI_AWS_S3API_COMPLETE_MULTIPART,
   }
   stdOut = s3api("complete-multipart-upload", bucketName, [
@@ -189,8 +195,8 @@ function copyMultipartUpload({bucketName, keyName, uploadId}) {
 
   // copy the singlepart object as second part
   checkTags = {
-    feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.CLI_AWS,
+    feature: tags.features.UPLOAD_MULTIPART_PART,
     command: tags.commands.CLI_AWS_S3API_UPLOAD_PART_COPY,
   }
   stdOut = s3api("upload-part-copy", bucketName, [
@@ -206,8 +212,8 @@ function copyMultipartUpload({bucketName, keyName, uploadId}) {
 
   // list uploaded parts
   checkTags = {
-    feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.CLI_AWS,
+    feature: tags.features.LIST_MULTIPART_UPLOAD_PARTS,
     command: tags.commands.CLI_AWS_S3API_LIST_PARTS,
   }
   stdOut = s3api("list-parts", bucketName, [
@@ -215,6 +221,9 @@ function copyMultipartUpload({bucketName, keyName, uploadId}) {
     "--upload-id", uploadId
   ])
   console.info("List parts Output:", stdOut)
+  check(stdOut, {
+    [`${checkTags.command}`]: s => s.includes("Parts")
+  }, checkTags)
   let parts = parseJsonOrFail(stdOut).Parts
   check(stdOut, {
     [`${checkTags.command} has Etags`]: s => checkParts(parts, etags)

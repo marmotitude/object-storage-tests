@@ -82,7 +82,7 @@ processed_data: ProcessedData = {
     'section_titles': section_titles,
     'tags_order': tags_order,
     'tags': {
-        tag: tag_counts[tag] for tag in tags_order
+        tag: tag_counts.get(tag) for tag in tags_order
     }
 }
 

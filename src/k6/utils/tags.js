@@ -13,6 +13,13 @@ const tags = {
     GET_OBJECT: "get object",
     PUT_OBJECT_PRESIGNED: "put object (presigned)",
     GET_OBJECT_PRESIGNED: "get object (presigned)",
+
+    // multipart objects
+    CREATE_MULTIPART_UPLOAD: "start multipart upload",
+    LIST_MULTIPART_UPLOADS: "list ongoing multipart uploads",
+    UPLOAD_MULTIPART_PART: "upload part of a multipart",
+    LIST_MULTIPART_UPLOAD_PARTS: "list parts of a multipart upload",
+    ABORT_MULTIPART_UPLOAD: "abort multipart upload",
     PUT_OBJECT_MULTIPART: "put object (multipart)",
 
     // temporary URLs
