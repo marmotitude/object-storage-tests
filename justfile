@@ -73,7 +73,8 @@ group-test test_name group_name +remotes: _setup
   results_json_file={{results_prefix}}/{{group_name}}/{{date}}/results.json
   results_yaml_file={{results_prefix}}/{{group_name}}/{{date}}/results.yaml
   results_html_file={{results_prefix}}/{{group_name}}/{{date}}/report.html
-  ./src/tag-report.py $results_json_file > $results_yaml_file
+  set -x
+  ./src/tag-report.py $results_json_file '{{remotes}}' > $results_yaml_file
   gotpl src/templates/report.html -f $results_yaml_file -o $results_dir
   echo results saved to $results_json_file, $results_yaml_file and $results_html_file
 

@@ -5,11 +5,12 @@ import yaml
 from typing import Dict, List, TypedDict
 
 # Check if the correct number of command line arguments is provided
-if len(sys.argv) != 2:
-    print("Usage: ./tag-report.py results.json > results.yaml")
+if len(sys.argv) != 3:
+    print("Usage: ./tag-report.py results.json 'remote1 remote2 remote3' > results.yaml")
     sys.exit(1)
 
 input_file = sys.argv[1]
+remotes_argument = sys.argv[2].split()
 
 # Define types for the yaml output structure
 RemoteName = str
@@ -36,7 +37,6 @@ class ProcessedData(TypedDict):
 
 # Read k6 JSON output file line by line
 tag_counts: Dict[TagName, TagSummary] = {}
-remotes_set: set[RemoteName] = set()
 oldest_check_time = None
 most_recent_check_time = None
 
@@ -54,7 +54,6 @@ try:
 
                     tags = entry['data']['tags']
                     remote = tags.get('remote', None)
-                    remotes_set.add(remote)  # Add remote to the set
                     value = entry['data']['value']
                     for tag, tag_value in tags.items():
                         if tag == 'remote':
@@ -69,6 +68,9 @@ except FileNotFoundError:
     print(f"Error: File '{input_file}' not found.")
     sys.exit(1)
 
+# Determine the order of remotes based on the second argument
+remotes_order = remotes_argument
+
 # Output processed data and remotes as YAML to stdout
 tags_order = ["feature", "tool", "command", "fix"]
 section_titles = ["Features", "Tools", "Commands", "Fixes"]
@@ -78,7 +80,7 @@ processed_data: ProcessedData = {
       'begin': oldest_check_time,
       'end': most_recent_check_time,
     },
-    'remotes': list(remotes_set),  # Convert set to list for YAML output
+    'remotes': remotes_order,
     'section_titles': section_titles,
     'tags_order': tags_order,
     'tags': {
