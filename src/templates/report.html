@@ -1,3 +1,8 @@
+<style>
+td {
+  padding: 0.5rem;
+}
+</style>
 <h1>Checks from {{ printf "%.16s" .period.begin }} to {{ printf "%.16s" .period.end }}</h1>
 {{range $i,$tag := .tags_order}}
 <section>
