@@ -6,7 +6,7 @@ from typing import Dict, List, TypedDict
 
 # Check if the correct number of command line arguments is provided
 if len(sys.argv) != 2:
-    print("Usage: ./script.py <k6_log.json>")
+    print("Usage: ./tag-report.py results.json > results.yaml")
     sys.exit(1)
 
 input_file = sys.argv[1]
