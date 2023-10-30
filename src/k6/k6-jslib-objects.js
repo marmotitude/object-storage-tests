@@ -81,7 +81,7 @@ export async function abortMultipart({bucketName}) {
     }, checkTags)
 
     checkTags = {
-      feature: tags.features.ABORT_MULTIPART,
+      feature: tags.features.PUT_OBJECT_MULTIPART,
       tool: tags.tools.LIB_JS_K6_AWS,
       command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_ABORT_MULTIPART,
     };
