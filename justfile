@@ -62,7 +62,7 @@ group-test test_name group_name +remotes: _setup
   # parallel_processes=2
   # printf "%s\0" {{remotes}} | xargs -0 -I @ -P $parallel_processes just test @ {{test_name}}
   for remote in {{remotes}}; do
-    just test $remote {{test_name}}
+    just test $remote {{test_name}} || true
   done
   # Group all json files of remotes dirs, from the past 10 minutes, into a single one
   cd {{results_prefix}}
