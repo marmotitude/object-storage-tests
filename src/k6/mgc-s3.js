@@ -15,6 +15,7 @@ const largeFileName = "k6"
 export function setup(){}
 
 export default function scenarios (data){
+    if (!mgcConfig) { return }
     createBucket(data)
     listBucket(data)
     uploadObject(data)
@@ -27,8 +28,9 @@ export default function scenarios (data){
 }
 
 export function teardown(){
+    if (!mgcConfig) { return }
     const output = exec.command("rm", ["-rf", `${bucketName}` ])
-  }
+}
 
 export function createBucket() {
     let checkTags = {
