@@ -26,6 +26,11 @@ import {
   setup as boto3Setup,
   teardown as boto3Teardown
 } from "./boto3-presigned.js";
+import {
+  default as mgcTest,
+  setup as mgcSetup,
+  teardown as mgcTeardown
+} from "./mgc-s3.js";
 
 // init stage
 // XXX: due to k6 this is the aggregated copy/paste of each init stage
@@ -33,9 +38,11 @@ import {
 const config = yamlParse(open('../../config.yaml'));
 const s3Config = config.remotes[__ENV.AWS_CLI_PROFILE].s3
 const swiftConfig = config.remotes[__ENV.AWS_CLI_PROFILE].swift
+const mgcConfig = config.remotes[__ENV.AWS_CLI_PROFILE].mgc
 const s3 = makeS3Client(s3Config);
 const testFileName = "LICENSE"
 const testFile = open(`../../${testFileName}`, "r");
+
 
 export function setup() {
   let setupData = {};
@@ -54,6 +61,9 @@ export function setup() {
   describe("Setup boto3 test", (_t) => {
     setupData.boto3Data = boto3Setup();
   });
+  describe("Setup mgc test", (_t) => {
+    setupData.mgcData = mgcSetup();
+  });
   return setupData;
 }
 export default function ({
@@ -62,6 +72,7 @@ export default function ({
   awsCliMultipartData,
   awsCliPresignData,
   boto3Data,
+  mgcData,
 }) {
   describe("Run k6-jslib-aws buckets test", async (_t) => {
     await k6JsLibBucketsTest(k6JsLibBucketsData);
@@ -78,6 +89,9 @@ export default function ({
   describe("Run boto3 presign test", (_t) => {
     boto3Test(boto3Data);
   });
+  describe("Run mgc-s3 test", (_t) => {
+    mgcTest(mgcData);
+  });
 }
 
 export function teardown({
@@ -86,6 +100,7 @@ export function teardown({
   awsCliMultipartData,
   awsCliPresignData,
   boto3Data,
+  mgcData,
 }) {
   describe("Teardown k6-jslib-aws objects test", (_t) => {
     k6JsLibObjectsTeardown(k6JsLibObjectsData);
@@ -101,5 +116,8 @@ export function teardown({
   });
   describe("Teardown boto3 presign test", (_t) => {
      boto3Teardown(boto3Data);
+  });
+  describe("Teardown mgc-s3 test", (_t) => {
+     mgcTeardown(mgcData);
   });
 }
