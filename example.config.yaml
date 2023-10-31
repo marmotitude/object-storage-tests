@@ -15,10 +15,11 @@ remotes:
   example-mgc:
     s3:
       endpoint: https://example.com
-      region: us-east-1
+      region: ""
       access_key: ""
       secret_key: ""
     mgc:
+      region: ""
       access_key: ""
       secret_key: ""
   local:

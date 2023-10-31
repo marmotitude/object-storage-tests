@@ -1,4 +1,4 @@
-import { check, fail } from 'k6'
+import { check } from 'k6'
 import { crypto } from "k6/experimental/webcrypto"
 import { mgc } from './utils/clis.js'
 import { parse as yamlParse } from 'k6/x/yaml';
@@ -87,9 +87,9 @@ export function multipartUpload() {
 
 export function downloadObject() {
     let checkTags = {
-        feature: tags.features.DELETE_BUCKET,
+        feature: tags.features.GET_OBJECT,
         tool: tags.tools.CLI_MGC,
-        command: tags.commands.CLI_MGC_BUCKETS_CREATE,
+        command: tags.commands.CLI_MGC_OBJECTS_DOWNLOAD,
       }
     const res = mgc(mgcConfig, "objects", "download", ["--src", `${bucketName}/${testFile}`, "--dst", bucketName])
     console.log(res)
