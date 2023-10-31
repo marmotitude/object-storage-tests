@@ -1,8 +1,10 @@
 # k6 with extensions: xk6-exec, xk6-file
 FROM grafana/xk6:0.9.2 as k6builder
 WORKDIR /app
+# TODO: return to the upstream grafana/xk6-exec and stop using a fork
+# once https://github.com/grafana/xk6-exec/issues/12 gets fixed
 RUN xk6 build v0.43.1 \
-      --with github.com/grafana/xk6-exec@v0.3.0 \
+      --with github.com/marmotitude/xk6-exec@da56f0e01262fd9db71edf3f0ffd55af5e11723a \
       --with github.com/avitalique/xk6-file@v1.4.0 \
       --with github.com/szkiba/xk6-yaml@latest
 
