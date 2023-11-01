@@ -3,9 +3,10 @@ A growing test suite for S3-like object storage implementations.
 
 ## About
 This project uses the load tests framework [k6][k6] (extended
-with some extensions) as the basis to execute test scenarios using popular open source
-command line tools like [aws-cli][aws-cli], [rclone][rclone], [swift-cli][swift-cli]
-as well as the open source k6 module [k6-jslib-aws][k6-jslib-aws].
+with some extensions) as the basis to execute test scenarios using popular
+open source command line tools like [aws-cli][aws-cli], [rclone][rclone],
+[swift-cli][swift-cli] as well as the open source k6 module
+[k6-jslib-aws][k6-jslib-aws].
 
 ### Roadmap
 This is an early-stage project and the main focus is to test proprietary
@@ -14,8 +15,9 @@ to include open source/self-hosted object storage providers as well,
 like [MinIO][minio] and [OpenStack Swift][openstack-swift], so tests using the
 [mc][mc] tool are in the roadmap.
 
-An informal "board" can be viewed [here](https://github.com/orgs/marmotitude/projects/2), card
-descriptions might be mixed in Portuguese and English.
+An informal "board" can be viewed
+[here](https://github.com/orgs/marmotitude/projects/2), card descriptions
+might be mixed in Portuguese and English.
 
 ## Requirements
 
@@ -24,13 +26,19 @@ This tool was only tested on **Linux** machines with
 
 ## Usage
 
-**object-storage-tests** is available as two [docker images](https://hub.docker.com/r/fczuardi/object-storage-tests):
-  - tag `latest` is the [main tests runner][Dockerfile] with its commands and requirements.
-  - tag `devshell` is a [shell for developers][devshell.Dockerfile] to use it interactively and make contributions.
+**object-storage-tests** is available as two
+[docker images](https://hub.docker.com/r/fczuardi/object-storage-tests):
+  - tag `latest` is the [main tests runner][Dockerfile] with its commands and
+requirements.
+  - tag `devshell` is a [shell for developers][devshell.Dockerfile] to use it
+interactively and make contributions.
 
-To run the test against a S3-compatible provider (we call them "remotes"), first
-copy the [example.config.yaml](./example.config.yaml) to `config.yaml` and edit it to
-include your credentials.
+To run the test against a S3-compatible provider (we call them "remotes"),
+first copy the [example.config.yaml](./example.config.yaml) to `config.yaml`
+and edit it to include your credentials.
+
+(Optional) If you have remotes that have a "mgc" config, copy the cli binary
+to the project path, renaming the executable to `mgc`.
 
 Then list the configured remotes with:
 ```
@@ -44,7 +52,8 @@ just run test <remote name>
 
 The output of the tests, metrics and logs are stored in a folder named `results`.
 
-**Note:** if you are inside the devshell, or not using the OCI images, you don't need the word `run` (see the "Contributing" section below)
+**Note:** if you are inside the devshell, or not using the OCI images, you
+don't need the word `run` (see the "Contributing" section below)
 
 
 ## License
@@ -53,8 +62,8 @@ MIT License (c) 2023 Marmotidude and [AUTHORS](./AUTHORS)
 
 ## Contributing
 
-The easiest way to have a working developing environment is to use the provided dev-shell,
-using [distrobox][distrobox]:
+The easiest way to have a working developing environment is to use the
+provided dev-shell, using [distrobox][distrobox]:
 
 First assemble the distrobox with:
 ```
@@ -71,9 +80,9 @@ To run the tests from inside the devshell use:
 just test <remote name>
 ```
 
-The devshell is a container with all the project tools installed, plus some extra developer
-tools like a code editor and a nice shell, to know more about this dev image see
-[devshell.Dockerfile][devshell.Dockerfile].
+The devshell is a container with all the project tools installed, plus some
+extra developer tools like a code editor and a nice shell, to know more about
+this dev image see [devshell.Dockerfile][devshell.Dockerfile].
 
 But you dont have to use it, feel free to install the tools used by this project:
 - [gotpl][gotpl]
@@ -81,6 +90,9 @@ But you dont have to use it, feel free to install the tools used by this project
 - [k6][k6] + [xk6-exec][xk6-exec] + [xk6-file][xk6-file] + [xk6-yaml][xk6-yaml]
 - [aws-cli][aws-cli]
 - [rclone][rclone]
+- Optional
+  - [swift-cli][swift-cli]
+  - mgc (unreleased)
   
 Check [Dockerfile][Dockerfile] for an up-to-date complete list.
 

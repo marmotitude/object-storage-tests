@@ -5,6 +5,10 @@ config_file := env_var_or_default("CONFIG_PATH", "./") + "config.yaml"
 results_prefix := "results"
 rclone_conf_exists := path_exists(env_var("HOME") + "/.config/rclone")
 aws_conf_exists := path_exists(env_var("HOME") + "/.aws")
+distroboxrc_cm := `dasel -f ~/.distroboxrc \
+  -s container_manager -r toml  2>/dev/null || true`
+fallback_cm := if distroboxrc_cm == "" { "podman" } else { distroboxrc_cm }
+oci_manager := env_var_or_default("DBX_CONTAINER_MANAGER", fallback_cm)
 
 # k6
 # https://k6.io/docs/get-started/running-k6/#adding-more-vus
@@ -31,7 +35,7 @@ check-tools:
   aws --version
   rclone --version | head -n1
   swift --version
-  mgc --version
+  mgc --version | true
   openssl version
   gotpl version | head -n1
   dasel --version
@@ -83,10 +87,12 @@ group-test test_name group_name +remotes: _setup
 # Run main docker image
 run *args:
   mkdir -p results
-  podman run \
-    --volume ./results:/app/results:Z \
-    --volume .:/app/config:Z \
-    --env "CONFIG_PATH=/app/config/" \
+  touch mgc
+  {{oci_manager}} run \
+    --volume ${PWD}/results:/app/results \
+    --volume ${PWD}/config.yaml:/app/config.yaml \
+    --volume ${PWD}/mgc:/usr/bin/mgc \
+    --env "CONFIG_PATH=/app/" \
     {{main_image}} {{args}}
 
 # Create create a distrobox for the dev-shell
@@ -98,11 +104,11 @@ dev:
   distrobox enter -a "--env EDITOR=/usr/bin/vim" {{distrobox_name}}
 
 # Build main docker image. Builder can be docker or podman.
-build builder="podman":
+build builder=oci_manager:
   {{builder}} build --rm -t {{main_image}} -f ./Dockerfile .
 
 # Build dev-shell image and assemble distrobox. Builder can be docker or podman.
-build-dev builder="podman":
+build-dev builder=oci_manager:
   {{builder}} build --rm -t {{devshell_image}} -f ./devshell.Dockerfile .
 
 
