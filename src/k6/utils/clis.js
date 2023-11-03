@@ -33,3 +33,9 @@ export function mgc({region}, command, subCommand, args=[]){
     ...args,
   ])
 }
+export function rclone({}, subCommand, args=[]){
+  return exec.command("rclone", [
+    subCommand,
+    ...args,
+  ])
+}
