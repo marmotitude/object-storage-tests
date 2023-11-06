@@ -12,19 +12,38 @@ open source command line tools like [aws-cli][aws-cli], [rclone][rclone],
 This is an early-stage project and the main focus is to test proprietary
 object storage providers, like AWS and Digital Ocean. But we would like
 to include open source/self-hosted object storage providers as well,
-like [MinIO][minio] and [OpenStack Swift][openstack-swift], so tests using the
-[mc][mc] tool are in the roadmap.
+some extra tests for [OpenStack Swift][openstack-swift] providers are available and
+other free solutions like [MinIO][minio] using the [mc][mc] tool are in the roadmap.
 
-An informal "board" can be viewed
+An informal kanban board can be viewed
 [here](https://github.com/orgs/marmotitude/projects/2), card descriptions
 might be mixed in Portuguese and English.
 
 ## Requirements
 
 This tool was only tested on **Linux** machines with
-[just][just] and docker (or [podman][podman]) installed.
+[just][just] and [podman][podman] (or docker) installed.
 
 ## Usage
+
+### Download latest version
+
+```
+git clone https://github.com/marmotitude/object-storage-tests.git
+cd object-storage-tests
+```
+
+### Setup remotes (config.yaml)
+
+To run the test against a S3-compatible provider (we call them "remotes"),
+first copy the [example.config.yaml](./example.config.yaml) to `config.yaml`
+and edit it to include your credentials.
+
+```
+cp example.config.yaml config.yaml
+vim config.yaml #edit with your remotes
+```
+### Run tests using a pre-made docker image
 
 **object-storage-tests** is available as two
 [docker images](https://hub.docker.com/r/fczuardi/object-storage-tests):
@@ -33,27 +52,47 @@ requirements.
   - tag `devshell` is a [shell for developers][devshell.Dockerfile] to use it
 interactively and make contributions.
 
-To run the test against a S3-compatible provider (we call them "remotes"),
-first copy the [example.config.yaml](./example.config.yaml) to `config.yaml`
-and edit it to include your credentials.
+If you are on a machine with podman installed, you can use `just run <command>` to execute a
+command from within the main test runner image (tag latest). For example:
 
-(Optional) If you have remotes that have a "mgc" config, copy the cli binary
-to the project path, renaming the executable to `mgc`.
+#### list available commands
 
-Then list the configured remotes with:
+```
+just run
+```
+
+#### list available remotes
 ```
 just run list-remotes
 ```
 
-And run the tests with:
+#### list available test scenarios
 ```
-just run test <remote name>
+just run list-tests
 ```
 
-The output of the tests, metrics and logs are stored in a folder named `results`.
+#### run a single test scenario agains a single remote
 
-**Note:** if you are inside the devshell, or not using the OCI images, you
-don't need the word `run` (see the "Contributing" section below)
+```
+just run test aws-east-1 boto3-presigned
+```
+
+The output of the tests are stored in a folder named `results`.
+
+#### run the default s3 scenarions on a single remote
+```
+just run test aws-east-1
+```
+
+### (Optional) mgc cli
+If you have remotes that have a "mgc" config, copy the cli binary
+to the project path, renaming the executable to `mgc`.
+
+### Run commands from inside the devshell
+
+if you are inside the devshell, or not using the OCI images, you
+don't need the word `run` (see the "Contributing" section below), you can use `just <command>`
+directly.
 
 
 ## License
@@ -93,14 +132,14 @@ But you dont have to use it, feel free to install the tools used by this project
 - Optional
   - [swift-cli][swift-cli]
   - mgc (unreleased)
-  
+
 Check [Dockerfile][Dockerfile] for an up-to-date complete list.
 
 ## Acknowledgments
 
 - Luizalabs / @kikoreis / @cprov: for sponsoring @fczuardi and for supporting an open culture
 - rclone: for being a powerful swiss army knife tool
-- Grafana / K6: for open sourcing tools and for fostering a community around them 
+- Grafana / K6: for open sourcing tools and for fostering a community around them
 - NixOs: for planting the reproducible builds seeds
 - Universal Blue / @castrojo / Boxkit Alpine: for promoting usability, community-driven projects and showcasing nice tools
 - Microsoft / Github: for providing a great platform for developers for free
