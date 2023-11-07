@@ -31,6 +31,11 @@ import {
   setup as mgcSetup,
   teardown as mgcTeardown
 } from "./mgc-s3.js";
+import {
+  default as rcloneTest,
+  setup as rcloneSetup,
+  teardown as rcloneTeardown
+} from "./rclone-s3.js";
 
 // init stage
 // XXX: due to k6 this is the aggregated copy/paste of each init stage
@@ -64,6 +69,9 @@ export function setup() {
   describe("Setup mgc test", (_t) => {
     setupData.mgcData = mgcSetup();
   });
+  describe("Setup rclone test", (_t) => {
+    setupData.rcloneData = rcloneSetup();
+  });
   return setupData;
 }
 export default function ({
@@ -73,6 +81,7 @@ export default function ({
   awsCliPresignData,
   boto3Data,
   mgcData,
+  rcloneData,
 }) {
   describe("Run k6-jslib-aws buckets test", async (_t) => {
     await k6JsLibBucketsTest(k6JsLibBucketsData);
@@ -92,6 +101,9 @@ export default function ({
   describe("Run mgc-s3 test", (_t) => {
     mgcTest(mgcData);
   });
+  describe("Run rclone-s3 test", (_t) => {
+    rcloneTest(rcloneData);
+  });
 }
 
 export function teardown({
@@ -101,6 +113,7 @@ export function teardown({
   awsCliPresignData,
   boto3Data,
   mgcData,
+  rcloneData,
 }) {
   describe("Teardown k6-jslib-aws objects test", (_t) => {
     k6JsLibObjectsTeardown(k6JsLibObjectsData);
@@ -119,5 +132,8 @@ export function teardown({
   });
   describe("Teardown mgc-s3 test", (_t) => {
      mgcTeardown(mgcData);
+  });
+  describe("Teardown rclone-s3 test", (_t) => {
+     mgcTeardown(rcloneData);
   });
 }
