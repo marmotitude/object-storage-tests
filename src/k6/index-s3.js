@@ -34,7 +34,6 @@ import {
 import {
   default as rcloneTest,
   setup as rcloneSetup,
-  teardown as rcloneTeardown
 } from "./rclone-s3.js";
 
 // init stage
