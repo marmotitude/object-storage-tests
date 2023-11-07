@@ -16,6 +16,7 @@ const largeFileName = "k6"
 export function setup(){
     return bucketSetup(rcloneConfig);
 }
+export function teardown(){};
 
 export default function scenarios (data){
     uploadObject(data)
