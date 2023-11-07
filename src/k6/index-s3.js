@@ -133,7 +133,4 @@ export function teardown({
   describe("Teardown mgc-s3 test", (_t) => {
      mgcTeardown(mgcData);
   });
-  describe("Teardown rclone-s3 test", (_t) => {
-     mgcTeardown(rcloneData);
-  });
 }

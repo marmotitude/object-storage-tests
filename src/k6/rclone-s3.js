@@ -2,7 +2,7 @@ import { check } from 'k6'
 import exec from 'k6/x/exec';
 import { parse as yamlParse } from 'k6/x/yaml';
 import { rclone } from './utils/clis.js'
-import {bucketSetup, bucketTeardown} from "./utils/test-bucket.js"
+import {bucketSetup } from "./utils/test-bucket.js"
 import tags from "./utils/tags.js"
 
 const profileName = __ENV.AWS_CLI_PROFILE
@@ -16,7 +16,6 @@ const largeFileName = "k6"
 export function setup(){
     return bucketSetup(rcloneConfig);
 }
-export function teardown(){};
 
 export default function scenarios (data){
     uploadObject(data)
@@ -33,7 +32,7 @@ export function uploadObject({bucketName}) {
         tool: tags.tools.CLI_RCLONE,
         command: tags.commands.CLI_RCLONE_COPY,
     }
-    const res = rclone(rcloneConfig, "copy", [testFile, `${profileName}-s3:${bucketName}`])
+    const res = rclone("copy", [testFile, `${profileName}-s3:${bucketName}`])
     console.log(res)
     check(res, {[`${checkTags.command} upload`]:l => !l.includes('exit status')}, checkTags)
 }
@@ -44,7 +43,7 @@ export function uploadMultipartObject({bucketName}) {
         tool: tags.tools.CLI_RCLONE,
         command: tags.commands.CLI_RCLONE_COPY,
       }
-    const res = rclone(rcloneConfig, "copy", [largeFile, `${profileName}-s3:${bucketName}`,'--transfers', '4', '--s3-upload-concurrency', '4', '--s3-chunk-size', '5Mi'])
+    const res = rclone("copy", [largeFile, `${profileName}-s3:${bucketName}`,'--transfers', '4', '--s3-upload-concurrency', '4', '--s3-chunk-size', '5Mi'])
     console.log(res)
     check(res, {[`${checkTags.command} upload multipart`]:l => !l.includes('exit status')}, checkTags)
 }
@@ -57,7 +56,7 @@ export function downloadObject({bucketName}) {
     }
     const outDir = `test-local-${bucketName}`
     // test copying to the same existing local file
-    const copyOutput = rclone(rcloneConfig, "copy", [`${profileName}-s3:${bucketName}/${testFile}`, `.`])
+    const copyOutput = rclone("copy", [`${profileName}-s3:${bucketName}/${testFile}`, `.`])
     console.log("download response:", copyOutput)
     check(copyOutput, {
       [`${checkTags.command} download to existing`]:out => !out.includes('exit status'),
@@ -66,7 +65,7 @@ export function downloadObject({bucketName}) {
     // test copying file not present on destination
     // delete local file before downloading
     const newName = `${testFile}2`
-    const copyOutput2 = rclone(rcloneConfig, "copyto", [`${profileName}-s3:${bucketName}/${testFile}`, `./${newName}`])
+    const copyOutput2 = rclone("copyto", [`${profileName}-s3:${bucketName}/${testFile}`, `./${newName}`])
     console.log("download2 response:", copyOutput2)
     check(copyOutput2, {
       [`${checkTags.command} download`]:out => !out.includes('exit status'),
@@ -81,7 +80,7 @@ export function listBuckets({bucketName}) {
       tool: tags.tools.CLI_RCLONE,
       command: tags.commands.CLI_RCLONE_LIST,
     }
-    const res = rclone(rcloneConfig, "lsd", [`${profileName}-s3:`])
+    const res = rclone("lsd", [`${profileName}-s3:`])
     console.log(res)
   check(res, {[checkTags.command]:l => l.includes(`${bucketName}`)}, checkTags)
 }
@@ -92,7 +91,7 @@ export function rcloneCat({bucketName}) {
         tool: tags.tools.CLI_RCLONE,
         command: tags.commands.CLI_RCLONE_CAT,
       }
-      const res = rclone(rcloneConfig, "cat", [`${profileName}-s3:${bucketName}/${testFile}`])
+      const res = rclone("cat", [`${profileName}-s3:${bucketName}/${testFile}`])
       console.log("cat response", res)
     check(res, {[checkTags.command]:l => l.includes("MIT License")}, checkTags)
 }
@@ -103,7 +102,7 @@ export function purgeBucket({bucketName}) {
         tool: tags.tools.CLI_RCLONE,
         command: tags.commands.CLI_RCLONE_PURGE,
       }
-    const res = rclone(rcloneConfig, "purge", [`${profileName}-s3:${bucketName}`])
+    const res = rclone("purge", [`${profileName}-s3:${bucketName}`])
     console.log(res)
     check(res, {[checkTags.command]:l => !l.includes("exit status")}, checkTags)
 }
