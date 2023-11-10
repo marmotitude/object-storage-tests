@@ -13,8 +13,9 @@ with open('config.yaml', 'r') as file:
     config = yaml.safe_load(file)
 
 endpoint_url = config['remotes'][profile_name]['s3']['endpoint']
+region = config['remotes'][profile_name]['s3']['region']
 
-my_session = boto3.session.Session(profile_name=profile_name)
+my_session = boto3.session.Session(profile_name=profile_name, region_name=region)
 my_config = Config(
     signature_version = 'v4',
 )
