@@ -60,7 +60,7 @@ test remote test_name="index-s3": _setup
 group-test test_name group_name +remotes: _setup
   #!/usr/bin/env sh
   results_dir={{results_prefix}}/{{group_name}}/{{date}}
-  past_minutes=10
+  past_minutes=60
   echo $results_dir
   mkdir -p $results_dir
   # TODO: do we want to parallelize?
