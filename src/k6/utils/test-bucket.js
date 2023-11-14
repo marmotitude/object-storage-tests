@@ -1,10 +1,10 @@
-import { check } from 'k6'
+import { check, fail } from 'k6'
 import { crypto } from "k6/experimental/webcrypto"
 import { aws } from "./clis.js"
 import tags from "./tags.js"
 
 export function bucketSetup(s3Config) {
-  const bucketName = `test-k6-jslib-aws-${crypto.randomUUID()}`
+  const bucketName = `test-${crypto.randomUUID()}`
   const createBucketResult = aws(s3Config, "s3", ["mb", `s3://${bucketName}`])
   console.log(createBucketResult)
   const checkTags = {
@@ -13,7 +13,11 @@ export function bucketSetup(s3Config) {
     command: tags.commands.CLI_AWS_S3_MB,
   }
   check(createBucketResult, {
-    [checkTags.command]: out => out.includes(bucketName)}, checkTags)
+    [checkTags.command]: out => !out.includes("exit status") && out.includes(bucketName)
+  }, checkTags)
+  if (createBucketResult.includes("exit status")) {
+    fail("Failed `s3 mb` during test setup")
+  }
   return {bucketName, s3Config}
 }
 
