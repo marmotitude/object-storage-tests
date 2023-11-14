@@ -1,4 +1,4 @@
-import { describe } from "https://jslib.k6.io/k6chaijs/4.3.4.3/index.js";
+import { describe } from "../../vendor/k6chaijs.min.js";
 import {
   default as swiftCliAccountTest,
   setup as swiftCliAccountSetup,
