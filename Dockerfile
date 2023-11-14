@@ -33,6 +33,7 @@ RUN pip install --no-cache-dir python-keystoneclient
 
 WORKDIR /app
 COPY src /app/src
+COPY vendor /app/vendor
 COPY justfile /app/justfile
 COPY requirements.txt /app/requirements.txt
 COPY LICENSE /app/LICENSE
