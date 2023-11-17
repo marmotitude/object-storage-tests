@@ -5,18 +5,25 @@ import tags from "./tags.js"
 
 export function bucketSetup(s3Config) {
   const bucketName = `test-${crypto.randomUUID()}`
-  const createBucketResult = aws(s3Config, "s3", ["mb", `s3://${bucketName}`])
-  console.log(createBucketResult)
+  const locationConstraint = s3Config.region === 'us-east-1' ?  [] :
+    ["--create-bucket-configuration", `LocationConstraint=${s3Config.region}`]
+  console.log({locationConstraint})
+  const createBucketResult = aws(s3Config, "s3api", [
+    "create-bucket",
+    "--bucket", bucketName,
+    ...locationConstraint
+  ])
+  console.log("create-bucket output:", createBucketResult)
   const checkTags = {
     feature: tags.features.CREATE_BUCKET,
     tool: tags.tools.CLI_AWS,
-    command: tags.commands.CLI_AWS_S3_MB,
+    command: tags.commands.CLI_AWS_S3API_CREATE_BUCKET,
   }
   check(createBucketResult, {
-    [checkTags.command]: out => !out.includes("exit status") && out.includes(bucketName)
+    [checkTags.command]: out => !out.includes("exit status")
   }, checkTags)
   if (createBucketResult.includes("exit status")) {
-    fail("Failed `s3 mb` during test setup")
+    fail("Failed `s3api create-bucket` during test setup")
   }
   return {bucketName, s3Config}
 }
