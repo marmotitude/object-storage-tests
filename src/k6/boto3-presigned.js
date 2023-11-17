@@ -40,6 +40,7 @@ export function presignPut({bucketName}){
   const res = http.put(url.trim(), testFile)
   console.log(`PUT response status =${res.status}`)
   checkTags = {
+    feature: tags.features._PUT_OBJECT_PRESIGNED,
     feature: tags.features.PUT_OBJECT_PRESIGNED,
     tool: tags.tools.HTTP,
     command: tags.commands.HTTP_PUT,
@@ -52,6 +53,7 @@ export function presignPut({bucketName}){
     console.log(`s3 ls = ${lsOutput}`)
     let command = tags.commands.CLI_AWS_S3_LS
     checkTags = {
+      feature: tags.features._LIST_BUCKET_OBJECTS,
       feature: tags.features.LIST_BUCKET_OBJECTS,
       tool: tags.tools.CLI_AWS,
       command,
@@ -61,6 +63,7 @@ export function presignPut({bucketName}){
     }, checkTags)
 
     checkTags = {
+      feature: tags.features._PUT_OBJECT_PRESIGNED,
       feature: tags.features.PUT_OBJECT_PRESIGNED,
     }
     check(lsOutput, {

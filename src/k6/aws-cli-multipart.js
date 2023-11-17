@@ -73,6 +73,7 @@ function listMultipartUploads({bucketName, keyName, uploadId}) {
   // list multipart uploads
   const checkTags = {
     tool: tags.tools.CLI_AWS,
+    feature: tags.features._LIST_MULTIPART_UPLOADS,
     feature: tags.features.LIST_MULTIPART_UPLOADS,
     command: tags.commands.CLI_AWS_S3API_LIST_MULTIPART,
   }
@@ -90,6 +91,7 @@ function abortMultipartUpload({bucketName, keyName, uploadId}) {
   // abort the multipart upload
   const checkTags = {
     tool: tags.tools.CLI_AWS,
+    feature: tags.features._ABORT_MULTIPART_UPLOAD,
     feature: tags.features.ABORT_MULTIPART_UPLOAD,
     command: tags.commands.CLI_AWS_S3API_ABORT_MULTIPART,
   }
@@ -112,6 +114,7 @@ function completeMultipartUpload({bucketName, keyName, uploadId}) {
   let stdOut
   let checkTags = {
     tool: tags.tools.CLI_AWS,
+    feature: tags.features._UPLOAD_MULTIPART_PART,
     feature: tags.features.UPLOAD_MULTIPART_PART,
     command: tags.commands.CLI_AWS_S3API_UPLOAD_PART,
   }
@@ -132,6 +135,7 @@ function completeMultipartUpload({bucketName, keyName, uploadId}) {
   // list uploaded parts
   checkTags = {
     tool: tags.tools.CLI_AWS,
+    feature: tags.features._LIST_MULTIPART_UPLOAD_PARTS,
     feature: tags.features.LIST_MULTIPART_UPLOAD_PARTS,
     command: tags.commands.CLI_AWS_S3API_LIST_PARTS,
   }
@@ -154,6 +158,7 @@ function completeMultipartUpload({bucketName, keyName, uploadId}) {
   })
   checkTags = {
     tool: tags.tools.CLI_AWS,
+    feature: tags.features._PUT_OBJECT_MULTIPART,
     feature: tags.features.PUT_OBJECT_MULTIPART,
     command: tags.commands.CLI_AWS_S3API_COMPLETE_MULTIPART,
   }
@@ -179,6 +184,7 @@ function copyMultipartUpload({bucketName, keyName, uploadId}) {
   // upload any singlepart object
   let singlePartKeyName = `${keyName}_singlepart`
   let checkTags = {
+    feature: tags.features._PUT_OBJECT,
     feature: tags.features.PUT_OBJECT,
     tool: tags.tools.CLI_AWS,
     command: tags.commands.CLI_AWS_S3API_PUT_OBJECT,
@@ -196,6 +202,7 @@ function copyMultipartUpload({bucketName, keyName, uploadId}) {
   // copy the singlepart object as second part
   checkTags = {
     tool: tags.tools.CLI_AWS,
+    feature: tags.features._UPLOAD_MULTIPART_PART,
     feature: tags.features.UPLOAD_MULTIPART_PART,
     command: tags.commands.CLI_AWS_S3API_UPLOAD_PART_COPY,
   }
@@ -213,6 +220,7 @@ function copyMultipartUpload({bucketName, keyName, uploadId}) {
   // list uploaded parts
   checkTags = {
     tool: tags.tools.CLI_AWS,
+    feature: tags.features._LIST_MULTIPART_UPLOAD_PARTS,
     feature: tags.features.LIST_MULTIPART_UPLOAD_PARTS,
     command: tags.commands.CLI_AWS_S3API_LIST_PARTS,
   }

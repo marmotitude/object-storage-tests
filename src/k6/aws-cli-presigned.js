@@ -27,6 +27,7 @@ export function presignGet({bucketName}) {
 
   // upload a test file
   let checkTags = {
+    feature: tags.features._PUT_OBJECT,
     feature: tags.features.PUT_OBJECT,
     tool: tags.tools.CLI_AWS,
     command: tags.commands.CLI_AWS_S3_CP,
@@ -53,7 +54,8 @@ export function presignGet({bucketName}) {
   // download testFile using GET on that url before the expirantion date
   checkTags = {
     tool: tags.tools.HTTP,
-    feature: tags.features.GET_OBJECT_PRESIGNED_V4,
+    feature: tags.features._GET_OBJECT_PRESIGNED,
+    feature: tags.features.GET_OBJECT_PRESIGNED,
     command: tags.commands.HTTP_GET,
   }
   const res = http.get(url.trim())

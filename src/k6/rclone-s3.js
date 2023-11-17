@@ -28,6 +28,7 @@ export default function scenarios (data){
 
 export function uploadObject({bucketName}) {
     let checkTags = {
+        feature: tags.features._PUT_OBJECT,
         feature: tags.features.PUT_OBJECT,
         tool: tags.tools.CLI_RCLONE,
         command: tags.commands.CLI_RCLONE_COPY,
@@ -39,6 +40,7 @@ export function uploadObject({bucketName}) {
 
 export function uploadMultipartObject({bucketName}) {
     let checkTags = {
+        feature: tags.features._PUT_OBJECT,
         feature: tags.features.PUT_OBJECT,
         tool: tags.tools.CLI_RCLONE,
         command: tags.commands.CLI_RCLONE_COPY,
@@ -50,6 +52,7 @@ export function uploadMultipartObject({bucketName}) {
 
 export function downloadObject({bucketName}) {
     let checkTags = {
+        feature: tags.features._GET_OBJECT,
         feature: tags.features.GET_OBJECT,
         tool: tags.tools.CLI_RCLONE,
         command: tags.commands.CLI_RCLONE_COPY,
@@ -87,6 +90,7 @@ export function listBuckets({bucketName}) {
 
 export function rcloneCat({bucketName}) {
     let checkTags = {
+        feature: tags.features._GET_OBJECT,
         feature: tags.features.GET_OBJECT,
         tool: tags.tools.CLI_RCLONE,
         command: tags.commands.CLI_RCLONE_CAT,

@@ -30,6 +30,7 @@ export default async function scenarios(data) {
 export async function putAndGetObject({bucketName}) {
   const testFileKey = `${testFileName}_${crypto.randomUUID()}`
   let checkTags = {
+    feature: tags.features._PUT_OBJECT,
     feature: tags.features.PUT_OBJECT,
     tool: tags.tools.LIB_JS_K6_AWS,
     command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_PUT_OBJECT,
@@ -43,6 +44,7 @@ export async function putAndGetObject({bucketName}) {
   })
 
   checkTags = {
+    feature: tags.features._GET_OBJECT,
     feature: tags.features.GET_OBJECT,
     tool: tags.tools.LIB_JS_K6_AWS,
     command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_GET_OBJECT,
@@ -71,6 +73,7 @@ export async function abortMultipart({bucketName}) {
     console.error(e.message)
   }
   let checkTags = {
+    feature: tags.features._PUT_OBJECT_MULTIPART,
     feature: tags.features.PUT_OBJECT_MULTIPART,
     tool: tags.tools.LIB_JS_K6_AWS,
     command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_CREATE_MULTIPART,
@@ -81,6 +84,7 @@ export async function abortMultipart({bucketName}) {
     }, checkTags)
 
     checkTags = {
+      feature: tags.features._PUT_OBJECT_MULTIPART,
       feature: tags.features.PUT_OBJECT_MULTIPART,
       tool: tags.tools.LIB_JS_K6_AWS,
       command: tags.commands.LIB_JS_K6_AWS_S3CLIENT_ABORT_MULTIPART,

@@ -37,6 +37,7 @@ export function bucketTeardown({s3Config, bucketName}) {
   )
   console.log(purgeBucketResult)
   const checkTags = {
+    feature: tags.features._PURGE_BUCKET,
     feature: tags.features.PURGE_BUCKET,
     tool: tags.tools.CLI_AWS,
     command: tags.commands.CLI_AWS_S3_RB,

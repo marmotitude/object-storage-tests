@@ -56,6 +56,7 @@ export function listBucket() {
 
 export function uploadObject() {
     let checkTags = {
+        feature: tags.features._PUT_OBJECT,
         feature: tags.features.PUT_OBJECT,
         tool: tags.tools.CLI_MGC,
         command: tags.commands.CLI_MGC_OBJECTS_UPLOAD,
@@ -67,6 +68,7 @@ export function uploadObject() {
 
 export function listObject() {
     let checkTags = {
+        feature: tags.features._LIST_BUCKET_OBJECTS,
         feature: tags.features.LIST_BUCKET_OBJECTS,
         tool: tags.tools.CLI_MGC,
         command: tags.commands.CLI_MGC_BUCKETS_CREATE,
@@ -78,6 +80,7 @@ export function listObject() {
 
 export function multipartUpload() {
     let checkTags = {
+        feature: tags.features._PUT_OBJECT_MULTIPART,
         feature: tags.features.PUT_OBJECT_MULTIPART,
         tool: tags.tools.CLI_MGC,
         command: tags.commands.CLI_MGC_OBJECTS_UPLOAD,
@@ -89,6 +92,7 @@ export function multipartUpload() {
 
 export function downloadObject() {
     let checkTags = {
+        feature: tags.features._GET_OBJECT,
         feature: tags.features.GET_OBJECT,
         tool: tags.tools.CLI_MGC,
         command: tags.commands.CLI_MGC_OBJECTS_DOWNLOAD,
@@ -100,6 +104,7 @@ export function downloadObject() {
 
 export function deleteObject() {
     let checkTags = {
+        feature: tags.features._DELETE_OBJECT,
         feature: tags.features.DELETE_OBJECT,
         tool: tags.tools.CLI_MGC,
         command: tags.commands.CLI_MGC_OBJECTS_DELETE,
