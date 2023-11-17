@@ -4,31 +4,75 @@ const tags = {
     CREATE_BUCKET: "create bucket",
     LIST_BUCKETS: "list buckets",
     DELETE_BUCKET: "delete bucket",
-    DELETE_OBJECT: "delete bucket",
-    LIST_BUCKET_OBJECTS: "list bucket objects",
-    PURGE_BUCKET: "force delete bucket",
+    _LIST_BUCKET_OBJECTS: "list bucket objects",
+    _PURGE_BUCKET: "force delete bucket",
     BUCKET_INFO_CREATION_DATE: "bucket creation date",
 
     // objects
-    PUT_OBJECT: "put object",
-    GET_OBJECT: "get object",
-    PUT_OBJECT_PRESIGNED: "put object (presigned)",
-    GET_OBJECT_PRESIGNED: "get object (presigned)",
+    _PUT_OBJECT: "put object",
+    _DELETE_OBJECT: "delete object",
+    _GET_OBJECT: "get object",
+    _PUT_OBJECT_PRESIGNED: "put object (presigned)",
+    _GET_OBJECT_PRESIGNED: "get object (presigned)",
     GET_OBJECT_PRESIGNED_V2: "get object (presigned v2)",
-    GET_OBJECT_PRESIGNED_V4: "get object (presigned v4)",
 
     // multipart objects
     CREATE_MULTIPART_UPLOAD: "start multipart upload",
-    LIST_MULTIPART_UPLOADS: "list ongoing multipart uploads",
-    UPLOAD_MULTIPART_PART: "upload part of a multipart",
-    LIST_MULTIPART_UPLOAD_PARTS: "list parts of a multipart upload",
-    ABORT_MULTIPART_UPLOAD: "abort multipart upload",
-    PUT_OBJECT_MULTIPART: "put object (multipart)",
+    _LIST_MULTIPART_UPLOADS: "list ongoing multipart uploads",
+    _UPLOAD_MULTIPART_PART: "upload part of a multipart",
+    _LIST_MULTIPART_UPLOAD_PARTS: "list parts of a multipart upload",
+    _ABORT_MULTIPART_UPLOAD: "abort multipart upload",
+    _PUT_OBJECT_MULTIPART: "put object (multipart)",
 
-    // temporary URLs
-    CREATE_PRESIGN_PUT_URL: "create v4 presign upload URL",
-    CREATE_PRESIGN_GET_URL: "create v4 presign download URL",
-    CREATE_PRESIGN_PUT_URL_V2: "create v2 presign upload URL",
+    // new list
+
+    // Transfer Bucket Between Regions
+    // Set Bucket Permission to a Public Bucket
+    // Set Bucket Permission to a Private Bucket
+    PURGE_BUCKET: "Force Delete Bucket",
+    GET_OBJECT: "Download Object from a Bucket",
+    PUT_OBJECT: "Upload Object to a Bucket",
+    LIST_BUCKET_OBJECTS: "List All Objects in a Bucket",
+    //     Upload Object Date
+    //     Object Size
+    //     Last Modification
+    //     Object Metadata
+    DELETE_OBJECT: "Delete Object from a Bucket",
+    PUT_OBJECT_MULTIPART: "Put Object Multipart",
+    ABORT_MULTIPART_UPLOAD: "Abort Object Multipart",
+    // Pause Object Multipart
+    // Delete Object Multipart
+    // Resume Object Multipart
+    LIST_MULTIPART_UPLOADS: "List Ongoing Object Multipart Upload",
+    //    id part
+    //    Object Name
+    //    Upload Part Date
+    //    Status
+    //    Last Modification
+    LIST_MULTIPART_UPLOAD_PARTS: "List Parts of Object Multipart Upload",
+    //    Upload Object Date
+    //    Object Size
+    //    Last Modification
+    //    Object Metadata
+    UPLOAD_MULTIPART_PART: "Put Part of Object Multipart",
+    // Create Object ACL
+    // List Object ACL
+    // 	  User
+    // 	  Rules
+    // 	  Bucket ACL Creation Date
+    // 	  Last Modifcation
+    // Delete Object ACL
+    // Edit Object ACL
+    // Duplicate Object
+    // Copy Objects Between Buckets in the same region
+    // Copy Objects Between Buckets in different region
+    // Transfer Objects Between Buckets in the same region
+    // Transfer Objects Between Buckets in different region
+    GET_OBJECT_PRESIGNED: "Download a Private Object from a Generated Pre-Signed URL",
+    PUT_OBJECT_PRESIGNED: "Upload a Private Object to a Generated Pre-Signed URL",
+    // Generate Shared URL for Public Buckets
+    // Rename Objects
+    // Encrypt Objects
   },
   tools: {
     CLI_AWS: "aws cli",
