@@ -47,13 +47,13 @@ export function presignGet({bucketName}) {
   const url = aws(s3Config, "s3", [ "presign", `s3://${bucketName}/${fileName}` ])
   console.log(`Pre-signed GET URL=${url}`)
   check(url, {
-    [`${checkTags.command} GET URL contains Signature (v2) param`]: u => u.includes("Signature=")
+    [`${checkTags.command} GET URL contains Signature (v4) param`]: u => u.includes("X-Amz-Algorithm")
   }, checkTags)
 
   // download testFile using GET on that url before the expirantion date
   checkTags = {
     tool: tags.tools.HTTP,
-    feature: tags.features.GET_OBJECT_PRESIGNED_V2,
+    feature: tags.features.GET_OBJECT_PRESIGNED_V4,
     command: tags.commands.HTTP_GET,
   }
   const res = http.get(url.trim())
