@@ -15,6 +15,7 @@ const tags = {
     PUT_OBJECT_PRESIGNED: "put object (presigned)",
     GET_OBJECT_PRESIGNED: "get object (presigned)",
     GET_OBJECT_PRESIGNED_V2: "get object (presigned v2)",
+    GET_OBJECT_PRESIGNED_V4: "get object (presigned v4)",
 
     // multipart objects
     CREATE_MULTIPART_UPLOAD: "start multipart upload",
