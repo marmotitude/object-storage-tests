@@ -53,34 +53,43 @@ list-tests:
     | sed "s/\.js//g"
 
 # Test a S3-compatible provider with k6
-test remote test_name="index-s3": _setup
-  @just _test-k6 {{remote}} {{test_name}} {{date}}
+test remote test_name folder=date: _setup
+  @just _test-k6 {{remote}} {{test_name}} {{folder}}
 
 # Run the same test on multiple remotes
 group-test test_name group_name +remotes: _setup
   #!/usr/bin/env sh
-  results_dir={{results_prefix}}/{{group_name}}/{{date}}
-  past_minutes=60
+  results_subdir={{group_name}}/{{date}}
+  results_dir={{results_prefix}}/$results_subdir
   echo $results_dir
   mkdir -p $results_dir
   # TODO: do we want to parallelize?
   # parallel_processes=2
   # printf "%s\0" {{remotes}} | xargs -0 -I @ -P $parallel_processes just test @ {{test_name}}
   for remote in {{remotes}}; do
-    just test $remote {{test_name}} || true
+    just test $remote {{test_name}} {{date}} || true
   done
+  echo {{remotes}} > $results_dir/remotes.txt
+  just write-reports {{group_name}} {{date}}
+
+# Create html reports based on results from the past minutes
+write-reports group_name date:
+  #!/usr/bin/env sh
   # Group all json files of remotes dirs, from the past 10 minutes, into a single one
   cd {{results_prefix}}
+  results_subdir={{group_name}}/{{date}}
+  remotes=$(cat $results_subdir/remotes.txt)
+  echo $remotes
   echo concatenating the following results:
-  find {{remotes}} -mmin -$past_minutes -name "*.json" | sort -r
-  find {{remotes}} -mmin -$past_minutes -name "*.json" | sort -r | xargs cat > {{group_name}}/{{date}}/results.json
+  find $remotes -name "*.json" | grep {{date}} | sort -r
+  find $remotes -name "*.json" | grep {{date}} | sort -r | xargs cat > $results_subdir/results.json
   cd ..
-  results_json_file={{results_prefix}}/{{group_name}}/{{date}}/results.json
-  results_yaml_file={{results_prefix}}/{{group_name}}/{{date}}/results.yaml
-  results_html_file={{results_prefix}}/{{group_name}}/{{date}}/report.html
+  results_json_file={{results_prefix}}/$results_subdir/results.json
+  results_yaml_file={{results_prefix}}/$results_subdir/results.yaml
+  results_html_file={{results_prefix}}/$results_subdir/report.html
   set -x
-  ./src/tag-report.py $results_json_file '{{remotes}}' > $results_yaml_file
-  gotpl src/templates/report.html -f $results_yaml_file -o $results_dir
+  ./src/tag-report.py $results_json_file "$remotes" > $results_yaml_file
+  gotpl src/templates/report.html -f $results_yaml_file -o {{results_prefix}}/$results_subdir
   echo results saved to $results_json_file, $results_yaml_file and $results_html_file
 
 
