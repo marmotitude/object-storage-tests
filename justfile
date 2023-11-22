@@ -16,7 +16,7 @@ k6_vus := "1"
 k6_iterations := "1"
 
 # OCI
-main_image := "docker.io/fczuardi/object-storage-tests:latest"
+main_image := "ghcr.io/marmotitude/object-storage-tests:main"
 devshell_image := "docker.io/fczuardi/object-storage-tests:devshell"
 distrobox_name := "devshell-obj"
 
