@@ -1,4 +1,4 @@
-FROM fczuardi/object-storage-tests:latest
+FROM marmotitude/object-storage-tests:main
 RUN apk add \
       mandoc mandoc-doc \
       aws-cli-doc \
