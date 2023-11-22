@@ -21,8 +21,9 @@ jobs:
         username: ${{ env.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build Docker Image
-      run: docker build -t object-storage-tests:latest .
-
-    - name: Push Docker Image
-      run: docker push ${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/object-storage-tests:latest
+    - name: Build and push Docker image
+      uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+      with:
+        context: .
+        push: true
+        tags: latest
