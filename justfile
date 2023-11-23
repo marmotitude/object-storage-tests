@@ -73,16 +73,16 @@ group-test test_name group_name +remotes: _setup
   just write-reports {{group_name}} {{date}}
 
 # Create html reports based on results from the past minutes
-write-reports group_name date:
+write-reports group_name folder:
   #!/usr/bin/env sh
   # Group all json files of remotes dirs, from the past 10 minutes, into a single one
   cd {{results_prefix}}
-  results_subdir={{group_name}}/{{date}}
+  results_subdir={{group_name}}/{{folder}}
   remotes=$(cat $results_subdir/remotes.txt)
   echo $remotes
   echo concatenating the following results:
-  find $remotes -name "*.json" | grep {{date}} | sort -r
-  find $remotes -name "*.json" | grep {{date}} | sort -r | xargs cat > $results_subdir/results.json
+  find $remotes -name "*.json" | grep {{folder}} | sort -r
+  find $remotes -name "*.json" | grep {{folder}} | sort -r | xargs cat > $results_subdir/results.json
   cd ..
   results_json_file={{results_prefix}}/$results_subdir/results.json
   results_yaml_file={{results_prefix}}/$results_subdir/results.yaml
