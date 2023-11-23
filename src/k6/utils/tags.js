@@ -12,9 +12,9 @@ const tags = {
     // objects
     PUT_OBJECT: "put object",
     GET_OBJECT: "get object",
+    GET_OBJECT_PUBLIC: "get object (public)",
     PUT_OBJECT_PRESIGNED: "put object (presigned)",
     GET_OBJECT_PRESIGNED: "get object (presigned)",
-    GET_OBJECT_PUBLIC: "get object (public)",
     GET_OBJECT_PRESIGNED_V2: "get object (presigned v2)",
     GET_OBJECT_PRESIGNED_V4: "get object (presigned v4)",
 
