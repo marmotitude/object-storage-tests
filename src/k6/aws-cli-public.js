@@ -48,7 +48,7 @@ export function publicGetWithProject({bucketName}) {
   // generate public (GET) url using AWS-CLI
   checkTags = {
     tool: tags.tools.CLI_AWS,
-    command: tags.commands.CLI_AWS_S3_PUT_BUCKET_ACL,
+    command: tags.commands.CLI_AWS_S3API_PUT_BUCKET_ACL,
   }
   const response = aws(s3Config, "s3api", [ "put-bucket-acl", "--bucket", bucketName, "--acl", "public-read" ])
   check(response, {
