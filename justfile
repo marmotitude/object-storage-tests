@@ -52,6 +52,10 @@ list-tests:
     --ignore utils \
     | sed "s/\.js//g"
 
+# clean test buckets
+clean-buckets profile:
+  ./src/k6/utils/clean-buckets.py {{profile}}
+
 # Test a S3-compatible provider with k6
 test remote test_name="index-s3": _setup
   @just _test-k6 {{remote}} {{test_name}} {{date}}
