@@ -53,7 +53,7 @@ list-tests:
     | sed "s/\.js//g"
 
 # clean test buckets
-clean-buckets profile:
+clean-buckets profile: _setup
   ./src/k6/utils/clean-buckets.py {{profile}}
 
 # Test a S3-compatible provider with k6
@@ -103,7 +103,7 @@ run *args:
   touch mgc
   {{oci_manager}} run \
     --volume ${PWD}/results:/app/results \
-    --volume ${PWD}/config.yaml:/app/config.yaml \
+    --volume ${PWD}/config.yaml:/app/config.yaml:z \
     --volume ${PWD}/mgc:/usr/bin/mgc \
     --env "CONFIG_PATH=/app/" \
     {{main_image}} {{args}}

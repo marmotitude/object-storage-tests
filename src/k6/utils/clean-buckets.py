@@ -2,7 +2,9 @@
 import boto3
 import sys
 import yaml
+import os
 
+config_file = os.path.join(os.getenv('CONFIG_PATH', '.'), 'config.yaml')
 
 def delete_bucket_contents(s3, bucket_name):
     objects = s3.list_objects_v2(Bucket=bucket_name)
@@ -11,7 +13,7 @@ def delete_bucket_contents(s3, bucket_name):
             s3.delete_object(Bucket=bucket_name, Key=obj['Key'])
 
 def delete_buckets(profile):
-    with open("config.yaml", "r") as stream:
+    with open(config_file, "r") as stream:
         try:
             data = yaml.safe_load(stream)
             endpoint = data['remotes'][profile]['s3']['endpoint']
