@@ -45,6 +45,22 @@ export function publicGetWithProject({bucketName}) {
     [`${checkTags.command} response have object key`]: o => o.includes(fileName),
   }, checkTags)
 
+  // download testFile using Private url
+  checkTags = {
+    tool: tags.tools.HTTP,
+    feature: tags.features.GET_OBJECT_PRIVATE,
+    command: tags.commands.HTTP_GET,
+  }
+  const url_priv = `${endpoint}/${mgcConfig.project}/${bucketName}/${fileName}`
+  //
+  console.log(url_priv)
+  const res_priv = http.get(url_priv.trim())
+  console.log(`GET response=${res_priv.body}`)
+  console.log(`GET response status =${res_priv.status}`)
+  check(res_priv.status, {
+    [`${checkTags.command} response have status 401`]: s => s === 401
+  }, checkTags)
+
   // generate public (GET) url using AWS-CLI
   checkTags = {
     tool: tags.tools.CLI_AWS,
