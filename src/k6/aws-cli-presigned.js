@@ -53,7 +53,7 @@ export function presignGet({bucketName}) {
   // download testFile using GET on that url before the expirantion date
   checkTags = {
     tool: tags.tools.HTTP,
-    feature: tags.features.GET_OBJECT_PRESIGNED_V4,
+    feature: tags.features.GET_OBJECT_PRESIGNED,
     command: tags.commands.HTTP_GET,
   }
   const res = http.get(url.trim())
