@@ -1,11 +1,22 @@
 import exec from 'k6/x/exec';
 
 const profileName = __ENV.AWS_CLI_PROFILE
+const profileName2 = `${__ENV.AWS_CLI_PROFILE}-second`
 
 export function aws({endpoint, region}, subCommand, args=[]){
   return exec.command("aws", [
     subCommand,
     "--profile", profileName,
+    "--endpoint", endpoint,
+    "--region", region,
+    ...args,
+  ])
+}
+
+export function aws2({endpoint, region}, subCommand, args=[]){
+  return exec.command("aws", [
+    subCommand,
+    "--profile", profileName2,
     "--endpoint", endpoint,
     "--region", region,
     ...args,
