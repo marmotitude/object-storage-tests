@@ -1,4 +1,4 @@
-current_remote: "example-mgc"
+# credentials and endpoints for multiple object storage providers
 remotes:
   aws-east-1:
     s3:
@@ -32,3 +32,15 @@ remotes:
       region: us-east-1
       access_key: "test:tester"
       secret_key: "testing"
+
+# TODO: mgc tool supports only one remote / profile, this config will be deprecated in the future
+current_remote: "example-mgc"
+
+# config for a webserver to expose results in a website, see webapp.Dockerfile
+webapp:
+  nginx:
+    listen: 5000
+    server_name: localhost
+    locations:
+      "/":
+        root: "/app/results"
