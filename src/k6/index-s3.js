@@ -55,8 +55,15 @@ const swiftConfig = config.remotes[__ENV.AWS_CLI_PROFILE].swift
 const mgcConfig = config.remotes[__ENV.AWS_CLI_PROFILE].mgc
 const s3 = makeS3Client(s3Config);
 const bucketName = __ENV.TEST_BUCKET
+const profileName = __ENV.AWS_CLI_PROFILE
 const testFileName = "LICENSE"
 const testFile = open(`../../${testFileName}`, "r");
+let s3ConfigSecond;
+try {
+  s3ConfigSecond = config.remotes[`${profile}-second`].s3;
+} catch (error) {
+  s3ConfigSecond = false;
+}
 
 
 export function setup() {
@@ -99,6 +106,7 @@ export default function ({
   mgcData,
   rcloneData,
   awsCliCreateBucketData,
+  awsCliDeleteObjectsData,
 }) {
   describe("Run k6-jslib-aws buckets test", async (_t) => {
     await k6JsLibBucketsTest(k6JsLibBucketsData);
@@ -136,14 +144,14 @@ export function teardown({
   awsCliPresignData,
   boto3Data,
   mgcData,
-  rcloneData,
-  awsCliCreateBucketData
+  awsCliCreateBucketData,
+  awsCliDeleteObjectsData
 }) {
-  describe("Teardown k6-jslib-aws objects test", (_t) => {
-    k6JsLibObjectsTeardown(k6JsLibObjectsData);
-  });
   describe("Teardown k6-jslib-aws buckets test", (_t) => {
     k6JsLibBucketsTeardown(k6JsLibBucketsData);
+  });
+  describe("Teardown k6-jslib-aws objects test", (_t) => {
+    k6JsLibObjectsTeardown(k6JsLibObjectsData);
   });
   describe("Teardown aws-cli multipart tests", (_t) => {
     awsCliMultipartTeardown(awsCliMultipartData);
