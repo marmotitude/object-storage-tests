@@ -2,3 +2,4 @@ config.yaml
 results
 venv
 mgc
+./nginx.conf
