@@ -35,6 +35,7 @@ WORKDIR /app
 COPY src /app/src
 COPY vendor /app/vendor
 COPY justfile /app/justfile
+COPY run_tests.sh /app/run_tests.sh
 COPY requirements.txt /app/requirements.txt
 COPY LICENSE /app/LICENSE
 RUN pip install --no-cache-dir --no-dependencies -r requirements.txt
