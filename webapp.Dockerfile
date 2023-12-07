@@ -26,7 +26,7 @@ RUN printf ":-)\n\nBuilded on $(date) by:$(hostname)" > results/smile.txt
 
 # Copy the shell script that runs desired tests outputing to results folder
 # this script will be executed by an external scheduler periodically
-# TBD
+COPY run_tests.sh
 
 # Expose port 5000
 EXPOSE 5000
