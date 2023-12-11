@@ -17,12 +17,17 @@ RemoteName = str
 SuccessCount = int
 TotalChecks = int
 TagName = str
+tool = str
+feature = str
+check = dict
+value = int
 
 class RemoteSuccessCount(TypedDict):
     success: SuccessCount
     total: TotalChecks
 
 TagSummary = Dict[TagName, Dict[RemoteName, RemoteSuccessCount]]
+checks_data: Dict[str, Dict[str, Dict[str, str]]] = {}
 
 class TestPeriod(TypedDict):
     begin: str
@@ -51,10 +56,19 @@ try:
                         oldest_check_time = check_time
                     if most_recent_check_time is None or check_time > most_recent_check_time:
                         most_recent_check_time = check_time
-
+                    #print(entry)
                     tags = entry['data']['tags']
+                    #print(tags)
                     remote = tags.get('remote', None)
                     value = entry['data']['value']
+                    feature = tags.get('feature')
+                    tool = tags.get('tool', None)
+                    if tool and feature:
+                        checks_data.setdefault(remote, {}).setdefault(tool, {}).update({
+                                feature: value
+                            })
+                    else:
+                        continue
                     for tag, tag_value in tags.items():
                         if tag == 'remote':
                             continue
@@ -72,8 +86,8 @@ except FileNotFoundError:
 remotes_order = remotes_argument
 
 # Output processed data and remotes as YAML to stdout
-tags_order = ["feature", "tool", "command", "fix"]
-section_titles = ["Features", "Tools", "Commands", "Fixes"]
+tags_order = ["feature", "tool", "command", "fix", "checks"]
+section_titles = ["Features", "Tools", "Commands", "Fixes", "checks"]
 
 processed_data: ProcessedData = {
     'period': {
@@ -84,8 +98,8 @@ processed_data: ProcessedData = {
     'section_titles': section_titles,
     'tags_order': tags_order,
     'tags': {
-        tag: tag_counts.get(tag) for tag in tags_order
-    }
+        tag: tag_counts.get(tag) if tag != "checks" else checks_data for tag in tags_order
+    },
 }
 
 try:

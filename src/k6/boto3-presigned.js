@@ -29,6 +29,8 @@ export function presignPut({bucketName}){
     __ENV.AWS_CLI_PROFILE, 'generate-put-url', bucketName, testFileName])
   console.log(url)
   let checkTags = {
+    feature: tags.features._PUT_OBJECT_PRESIGNED,
+    feature: tags.features.PUT_OBJECT_PRESIGNED,
     tool: tags.tools.LIB_PYTHON_BOTO3,
     command: tags.commands.LIB_PYTHON_BOTO3_CLIENT_GENERATE_PRESIGNED_URL,
   }

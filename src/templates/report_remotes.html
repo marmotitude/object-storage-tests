@@ -1,0 +1,42 @@
+<style>
+  td {
+    padding: 0.5rem;
+  }
+  .warn {
+    background-color: lightyellow;
+  }
+</style>
+
+<h1>Funcionalidades x Client</h1>
+{{range $i,$remote := .remotes}}
+<h2>{{ index $.remotes $i}}</h2>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Funcionalidade x Clients Provedor:{{$remote}}</th>
+      {{range $cli, $tests := index $.tags.checks $remote}}
+        <th>{{$cli}}</th>
+      {{end}}
+      </tr>
+  </thead>
+  <tbody>
+    {{range $cli, $tests := index $.tags.checks $remote}}
+      {{range $nameTest, $value := $tests}}
+        <tr>
+          <td>{{$nameTest}}</td>
+          {{range $innerCli, $innerTests := index $.tags.checks $remote}}
+            {{with index $innerTests $nameTest}}
+              <td{{if eq (printf "%v" .) "0"}} class="warn"{{end}}>
+                {{if eq (printf "%v" .) "1"}}Sim{{else if eq (printf "%v" .) "0"}}Não{{end}}
+              </td>
+            {{else}}
+              <td>-</td> 
+            {{end}}
+          {{end}}
+        </tr>
+      {{end}}
+    {{end}}
+  </tbody>
+</table>
+<br>
+{{end}}

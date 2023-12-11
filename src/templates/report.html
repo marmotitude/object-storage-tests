@@ -1,41 +1,43 @@
 <style>
-td {
-  padding: 0.5rem;
-}
-.warn {
-  background-color: lightyellow
-}
+  td {
+    padding: 0.5rem;
+  }
+  .warn {
+    background-color: lightyellow
+  }
 </style>
 <h1>Checks from {{ printf "%.16s" .period.begin }} to {{ printf "%.16s" .period.end }}</h1>
 {{range $i,$tag := .tags_order}}
-<section>
-  <h2>{{index $.section_titles $i}}</h2>
-  <table border="1">
-    <thead>
-      <tr>
-        <th rowspan=2>{{ $tag }}</th>
-        <th colspan="{{ len $.remotes }}">Success Count</th>
-      </tr>
-      <tr>
-        {{range $.remotes}}
-          <th>{{.}}</th>
-        {{end}}
-      </tr>
-    </thead>
-    <tbody>
-      {{range $name, $remotes := index $.tags $tag}}
+{{ if eq $tag "feature" }}
+  <section>
+    <h2>{{ index $.section_titles $i}}</h2>
+    <table border="1">
+      <thead>
         <tr>
-          <td>{{$name}}</td>
-          {{range $.remotes}}
-            {{with index $remotes .}}
-              <td{{ if ne .success .total }} class="warn"{{ end }}>{{.success}}/{{.total}}</td>
-            {{else}}
-              <td>-</td>
-            {{end}}
-          {{end}}
+          <th colspan=100>Funcionalidade x Provedor</th>
         </tr>
-      {{end}}
-    </tbody>
-  </table>
-</section>
+        <tr>
+            <th>Funcionalidade</th>
+              {{range $.remotes}}
+            <th>{{.}}</th>
+              {{end}}
+        </tr>
+      </thead>
+      <tbody>
+        {{range $name, $remotes := index $.tags $tag}}
+          <tr>
+            <td>{{$name}}</td>
+            {{range $.remotes}}
+              {{with index $remotes .}}
+                <td{{ if ne .success .total }} class="warn"{{ end }}> {{ if eq .success .total }}Sim{{ else if lt .success .total }}Parcial{{ else }}Não{{ end }}</td>
+              {{else}}
+                <td>-</td>
+              {{end}}
+            {{end}}
+          </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </section>
+{{ end }}
 {{end}}
