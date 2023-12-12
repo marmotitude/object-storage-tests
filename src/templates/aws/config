@@ -1,6 +1,8 @@
 {{range $remote_name, $remote := .remotes}}
   {{ if $remote.s3  }}
     [profile {{$remote_name }}]
+    endpoint_url = {{ $remote.s3.endpoint }}
+    region = {{ $remote.s3.region }}
   {{end}}
 {{end}}
 
