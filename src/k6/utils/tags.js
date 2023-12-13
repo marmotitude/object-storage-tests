@@ -4,25 +4,13 @@ const tags = {
     CREATE_BUCKET: "create bucket",
     LIST_BUCKETS: "list buckets",
     DELETE_BUCKET: "delete bucket",
-    _LIST_BUCKET_OBJECTS: "list bucket objects",
-    _PURGE_BUCKET: "force delete bucket",
     BUCKET_INFO_CREATION_DATE: "bucket creation date",
 
     // objects
-    _PUT_OBJECT: "put object",
-    _DELETE_OBJECT: "delete object",
-    _GET_OBJECT: "get object",
-    _PUT_OBJECT_PRESIGNED: "put object (presigned)",
-    _GET_OBJECT_PRESIGNED: "get object (presigned)",
     GET_OBJECT_PRESIGNED_V2: "get object (presigned v2)",
 
     // multipart objects
     CREATE_MULTIPART_UPLOAD: "start multipart upload",
-    _LIST_MULTIPART_UPLOADS: "list ongoing multipart uploads",
-    _UPLOAD_MULTIPART_PART: "upload part of a multipart",
-    _LIST_MULTIPART_UPLOAD_PARTS: "list parts of a multipart upload",
-    _ABORT_MULTIPART_UPLOAD: "abort multipart upload",
-    _PUT_OBJECT_MULTIPART: "put object (multipart)",
 
     // new list
 
