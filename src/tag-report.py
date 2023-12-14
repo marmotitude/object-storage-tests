@@ -14,6 +14,7 @@ remotes_argument = sys.argv[2].split()
 
 # Define types for the yaml output structure
 RemoteName = str
+ToolName = str
 SuccessCount = int
 TotalChecks = int
 TagName = str
@@ -22,6 +23,8 @@ class RemoteSuccessCount(TypedDict):
     success: SuccessCount
     total: TotalChecks
 
+# uma das tags, a "checks" nao segue este padrao
+# TODO: refatorar
 TagSummary = Dict[TagName, Dict[RemoteName, RemoteSuccessCount]]
 
 class TestPeriod(TypedDict):
@@ -31,6 +34,7 @@ class TestPeriod(TypedDict):
 class ProcessedData(TypedDict):
     period: TestPeriod
     remotes: List[RemoteName]
+    tools: List[ToolName]
     section_titles: List[str]
     tags_order: List[TagName]
     tags: TagSummary
@@ -39,22 +43,34 @@ class ProcessedData(TypedDict):
 tag_counts: Dict[TagName, TagSummary] = {}
 oldest_check_time = None
 most_recent_check_time = None
+checks_data = {}
 
 try:
     with open(input_file, 'r') as file:
         for line in file:
             try:
                 entry = json.loads(line)
+# Example:
+# {"metric":"checks","type":"Point","data":{"time":"2023-12-13T16:55:10.446688149-03:00","value":1,"tags":{"check":"aws s3 rb","command":"aws s3 rb","feature":"Force Delete Bucket","group":"::teardown","remote":"mc-ne-1","tool":"aws cli"}}}
+
                 if 'data' in entry and 'tags' in entry['data'] and entry['metric'] == "checks":
                     check_time = entry['data']['time']
                     if oldest_check_time is None or check_time < oldest_check_time:
                         oldest_check_time = check_time
                     if most_recent_check_time is None or check_time > most_recent_check_time:
                         most_recent_check_time = check_time
-
                     tags = entry['data']['tags']
                     remote = tags.get('remote', None)
                     value = entry['data']['value']
+                    feature = tags.get('feature')
+                    tool = tags.get('tool', None)
+                    if tool and feature:
+                        checks_data.setdefault(remote, {}).setdefault(feature, {}).setdefault(tool, { 'success': 0, 'total': 0 })
+                        checks_data[remote][feature][tool]['total'] += 1
+                        if value == 1:
+                            checks_data[remote][feature][tool]['success'] += 1
+                    else:
+                        continue
                     for tag, tag_value in tags.items():
                         if tag == 'remote':
                             continue
@@ -72,8 +88,9 @@ except FileNotFoundError:
 remotes_order = remotes_argument
 
 # Output processed data and remotes as YAML to stdout
-tags_order = ["feature", "tool", "command", "fix"]
-section_titles = ["Features", "Tools", "Commands", "Fixes"]
+tags_order = ["feature", "tool", "command", "fix", "checks"]
+section_titles = ["Features", "Tools", "Commands", "Fixes", "checks"]
+tool_names = list(tag_counts.get('tool').keys())
 
 processed_data: ProcessedData = {
     'period': {
@@ -81,15 +98,17 @@ processed_data: ProcessedData = {
       'end': most_recent_check_time,
     },
     'remotes': remotes_order,
+    'tools': tool_names,
     'section_titles': section_titles,
     'tags_order': tags_order,
     'tags': {
-        tag: tag_counts.get(tag) for tag in tags_order
-    }
+        tag: tag_counts.get(tag) if tag != "checks" else checks_data for tag in tags_order
+    },
 }
 
 try:
     yaml.dump(processed_data, sys.stdout, default_flow_style=False)
 except IOError:
+    print('Error: Unable to write YAML data to stdout')
     print('Error: Unable to write YAML data to stdout')
 
