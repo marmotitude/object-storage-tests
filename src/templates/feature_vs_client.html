@@ -1,6 +1,35 @@
-FOO
+<h1>{{.current_remote}}</h1>
+{{- $currentRemote := .current_remote -}}
+{{- $tools := .tools -}}
 
-{{.current_remote}}
+<table border="1">
+  <thead>
+    <tr>
+      <th colspan="{{ add (len .tools) 1}}">Provedor {{.current_remote}}: Funcionalidade x Client</th>
+    </tr>
+    <tr>
+      <th>Funcionalidade</th>
+    {{range $tool_name := .tools}}
+      <th>{{ $tool_name }}</th>
+    {{end}}
+    </tr>
+  </thead>
+  <tbody>
+{{- range $featureName, $feature := index .tags.checks $currentRemote }}
+      <tr>
+        <td>{{$featureName}}</td>
+  {{- range $toolName := $tools }}
+    {{- with index $feature $toolName }}
+        <td>{{ if (eq "0" (printf "%v" .success)) }}Não
+        {{else if (ne .success .total)}} Parcial {{else}} Sim {{end}}</td>
+    {{- else }}
+        <td>-</td>
+    {{- end }}
+  {{- end}}
+      </tr>
+{{- end }}
+  </tbody>
+</table>
 
-BAR
+<footer>Checks from {{ printf "%.16s" .period.begin }} to {{ printf "%.16s" .period.end }}</footer>
 
