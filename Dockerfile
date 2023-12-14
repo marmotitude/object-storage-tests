@@ -15,7 +15,7 @@ RUN wget https://github.com/belitre/gotpl/releases/download/v0.7/gotpl-v0.7-linu
 RUN cp linux-amd64/gotpl /app
 
 # main image
-FROM alpine:3
+FROM alpine:3.18.5
 RUN apk update && \
     apk add coreutils aws-cli rclone \
             just openssl dasel
