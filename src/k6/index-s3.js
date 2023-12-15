@@ -35,6 +35,11 @@ import {
   default as rcloneTest,
   setup as rcloneSetup,
 } from "./rclone-s3.js";
+import {
+  default as awsCliCreateBucketTest,
+  setup as awsCliCreateBucketSetup,
+  teardown as awsCliCreateBucketTeardown,
+} from "./aws-cli-create-bucket.js";
 
 // init stage
 // XXX: due to k6 this is the aggregated copy/paste of each init stage
@@ -71,6 +76,9 @@ export function setup() {
   describe("Setup rclone test", (_t) => {
     setupData.rcloneData = rcloneSetup();
   });
+  describe("Setup create bucket duplicate test", (_t) => {
+    setupData.awsCliCreateBucketData = awsCliCreateBucketSetup();
+  });
   return setupData;
 }
 export default function ({
@@ -81,6 +89,7 @@ export default function ({
   boto3Data,
   mgcData,
   rcloneData,
+  awsCliCreateBucketData,
 }) {
   describe("Run k6-jslib-aws buckets test", async (_t) => {
     await k6JsLibBucketsTest(k6JsLibBucketsData);
@@ -103,6 +112,9 @@ export default function ({
   describe("Run rclone-s3 test", (_t) => {
     rcloneTest(rcloneData);
   });
+  describe("Run create bucket duplicate test", (_t) => {
+    awsCliCreateBucketTest(awsCliCreateBucketData);
+  });
 }
 
 export function teardown({
@@ -113,6 +125,7 @@ export function teardown({
   boto3Data,
   mgcData,
   rcloneData,
+  awsCliCreateBucketData
 }) {
   describe("Teardown k6-jslib-aws objects test", (_t) => {
     k6JsLibObjectsTeardown(k6JsLibObjectsData);
@@ -131,5 +144,8 @@ export function teardown({
   });
   describe("Teardown mgc-s3 test", (_t) => {
      mgcTeardown(mgcData);
+  });
+  describe("Teardown aws-cli create bucket duplicate test", (_t) => {
+     awsCliCreateBucketTeardown(awsCliCreateBucketData);
   });
 }

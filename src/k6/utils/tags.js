@@ -5,6 +5,7 @@ const tags = {
     LIST_BUCKETS: "list buckets",
     DELETE_BUCKET: "delete bucket",
     BUCKET_INFO_CREATION_DATE: "bucket creation date",
+    CREATE_BUCKET_DUPLICATE: "create bucket duplicate",
 
     // objects
     GET_OBJECT_PRESIGNED_V2: "get object (presigned v2)",
@@ -105,6 +106,7 @@ const tags = {
     LIB_JS_K6_AWS_S3CLIENT_GET_OBJECT: "k6-jslib-aws S3Client.getObject",
     LIB_JS_K6_AWS_S3CLIENT_CREATE_MULTIPART: "k6-jslib-aws S3Client.createMultipartUpload",
     LIB_JS_K6_AWS_S3CLIENT_ABORT_MULTIPART: "k6-jslib-aws S3Client.abortMultipartUpload",
+    LIB_JS_K6_AWS_S3CLIENT_CREATE_BUCKET: "k6-jslib-aws S3Client.createBucket",
   },
   fixes: {
     CREATION_DATE_2009_02_03: "OpenStack Swift Bug #1856938",
