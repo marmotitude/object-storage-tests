@@ -45,12 +45,15 @@ vim config.yaml #edit with your remotes
 ```
 ### Run tests using a pre-made docker image
 
-**object-storage-tests** is available as two
-[docker images](https://hub.docker.com/r/fczuardi/object-storage-tests):
-  - tag `latest` is the [main tests runner][Dockerfile] with its commands and
+**object-storage-tests** is available as three
+[docker images](https://github.com/marmotitude/object-storage-tests/pkgs/container/object-storage-tests/versions?filters%5Bversion_type%5D=tagged):
+  - tag `main` is the [main tests runner][Dockerfile] with its commands and
 requirements.
   - tag `devshell` is a [shell for developers][devshell.Dockerfile] to use it
 interactively and make contributions.
+  - tag `webapp` is the same as main with a [webserver exposed on port 5000][webapp.Dockerfile] that
+serves html reports from the `results` folder, this image have a `run_tests.sh` script that updates
+the folder with a new report.
 
 If you are on a machine with podman installed, you can use `just run <command>` to execute a
 command from within the main test runner image (tag latest). For example:

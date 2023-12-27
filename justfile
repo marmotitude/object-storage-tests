@@ -17,6 +17,7 @@ k6_iterations := "1"
 
 # OCI
 main_image := "ghcr.io/marmotitude/object-storage-tests:main"
+webapp_image := "ghcr.io/marmotitude/object-storage-tests:webapp"
 devshell_image := "docker.io/fczuardi/object-storage-tests:devshell"
 distrobox_name := "devshell-obj"
 
@@ -127,6 +128,12 @@ build builder=oci_manager:
 # Build dev-shell image and assemble distrobox. Builder can be docker or podman.
 build-dev builder=oci_manager:
   {{builder}} build --rm -t {{devshell_image}} -f ./devshell.Dockerfile .
+
+# Build webapp image.
+build-webapp builder=oci_manager:
+  # write ./nginx.conf to be copied by Dockerfile
+  gotpl -f config.yaml src/templates/nginx.conf --output .
+  {{builder}} build --rm -t {{webapp_image}} -f ./webapp.Dockerfile .
 
 
 # Private recipes
