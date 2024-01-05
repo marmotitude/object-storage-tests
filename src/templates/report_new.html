@@ -1,10 +1,18 @@
-<table border="1">
+<html>
+<head>
+<link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+<style>
+body {
+  grid-template-columns: 1fr min(70rem,90%) 1fr;
+}
+</style>
+</head>
+<body>
+<table>
   <thead>
+    <caption>Feature Support by Provider</caption>
     <tr>
-      <th colspan="{{ add (len .remotes) 1}}">Funcionalidade x Provedor</th>
-    </tr>
-    <tr>
-      <th>Funcionalidade</th>
+      <th>Feature</th>
     {{range $remote_name := .remotes}}
       <th><a href="./{{ $remote_name }}.html">{{ $remote_name }}</a></th>
     {{end}}
@@ -16,8 +24,8 @@
         <td>{{$name}}</td>
         {{range $.remotes}}
           {{with index $remotes .}}
-            <td>{{ if (eq "0" (printf "%v" .success)) }}Não
-            {{else if (ne .success .total)}} Parcial {{else}} Sim {{end}}</td>
+            <td>{{ if (eq "0" (printf "%v" .success)) }}No
+            {{else if (ne .success .total)}} Partial {{else}} Yes {{end}}</td>
           {{else}}
             <td>-</td>
           {{end}}
@@ -27,4 +35,5 @@
   </tbody>
 </table>
 
-<footer>Checks from {{ printf "%.16s" .period.begin }} to {{ printf "%.16s" .period.end }}</footer>
+<footer>Checks from {{ printf "%.16s" .period.begin }} to {{ printf "%.16s" .period.end }}.</footer>
+</body>
