@@ -1,14 +1,22 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+<style>
+body {
+  grid-template-columns: 1fr min(70rem,90%) 1fr;
+}
+</style>
+</head>
+<body>
 <h1>{{.current_remote}}</h1>
 {{- $currentRemote := .current_remote -}}
 {{- $tools := .tools -}}
 
 <table border="1">
   <thead>
+    <caption> Provider {{.current_remote}}: Features tested using Clients </caption>
     <tr>
-      <th colspan="{{ add (len .tools) 1}}">Provedor {{.current_remote}}: Funcionalidade x Client</th>
-    </tr>
-    <tr>
-      <th>Funcionalidade</th>
+      <th>Feature</th>
     {{range $tool_name := .tools}}
       <th>{{ $tool_name }}</th>
     {{end}}
@@ -20,8 +28,8 @@
         <td>{{$featureName}}</td>
   {{- range $toolName := $tools }}
     {{- with index $feature $toolName }}
-        <td>{{ if (eq "0" (printf "%v" .success)) }}Não
-        {{else if (ne .success .total)}} Parcial {{else}} Sim {{end}}</td>
+        <td>{{ if (eq "0" (printf "%v" .success)) }}No
+        {{else if (ne .success .total)}} Partial {{else}} Yes {{end}}</td>
     {{- else }}
         <td>-</td>
     {{- end }}
@@ -31,5 +39,5 @@
   </tbody>
 </table>
 
-<footer>Checks from {{ printf "%.16s" .period.begin }} to {{ printf "%.16s" .period.end }}</footer>
-
+<footer>Checks from {{ printf "%.16s" .period.begin }} to {{ printf "%.16s" .period.end }} <a href="../../{{ .current_remote }}/{{ .date_path }}/">Detailed logs</a></footer>
+</body>

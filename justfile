@@ -96,7 +96,7 @@ write-reports group_name folder:
   gotpl src/templates/report_new.html -f $results_yaml_file -o {{results_prefix}}/$results_subdir
   echo results saved to $results_json_file, $results_yaml_file and $results_html_file
   for remote in $remotes; do
-    gotpl src/templates/feature_vs_client.html -f $results_yaml_file -s current_remote=$remote -o {{results_prefix}}/$results_subdir
+    gotpl src/templates/feature_vs_client.html -f $results_yaml_file -s current_remote=$remote -s date_path="{{folder}}" -o {{results_prefix}}/$results_subdir
     mv {{results_prefix}}/$results_subdir/feature_vs_client.html {{results_prefix}}/$results_subdir/$remote.html
   done
 
