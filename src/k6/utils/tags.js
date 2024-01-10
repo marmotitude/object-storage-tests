@@ -1,7 +1,6 @@
 const tags = {
   features: {
     // buckets
-    CREATE_BUCKET: "create bucket",
     LIST_BUCKETS: "list buckets",
     DELETE_BUCKET: "delete bucket",
     BUCKET_INFO_CREATION_DATE: "bucket creation date",
@@ -15,6 +14,7 @@ const tags = {
 
     // new list
 
+    CREATE_BUCKET: "Create Bucket",
     // Transfer Bucket Between Regions
     // Set Bucket Permission to a Public Bucket
     // Set Bucket Permission to a Private Bucket
@@ -27,6 +27,7 @@ const tags = {
     //     Last Modification
     //     Object Metadata
     DELETE_OBJECT: "Delete Object from a Bucket",
+    DELETE_OBJECTS: "Delete Multiple Objects from a Bucket",
     PUT_OBJECT_MULTIPART: "Put Object Multipart",
     ABORT_MULTIPART_UPLOAD: "Abort Object Multipart",
     // Pause Object Multipart
@@ -75,11 +76,14 @@ const tags = {
   commands: {
     CLI_AWS_S3_MB: "aws s3 mb",
     CLI_AWS_S3_RB: "aws s3 rb",
+    CLI_AWS_S3_RM: "aws s3 rm",
     CLI_AWS_S3_LS: "aws s3 ls",
     CLI_AWS_S3_CP: "aws s3 cp",
     CLI_AWS_S3_PRESIGN: "aws s3 presign",
     CLI_AWS_S3API_CREATE_BUCKET: "aws s3api create-bucket",
     CLI_AWS_S3API_PUT_OBJECT: "aws s3api put-object",
+    CLI_AWS_S3API_DELETE_OBJECT: "aws s3api delete-object",
+    CLI_AWS_S3API_DELETE_OBJECTS: "aws s3api delete-objects",
     CLI_AWS_S3API_CREATE_MULTIPART: "aws s3api create-multipart-upload",
     CLI_AWS_S3API_LIST_MULTIPART: "aws s3api list-multipart-uploads",
     CLI_AWS_S3API_ABORT_MULTIPART: "aws s3api abort-multipart-upload",
@@ -95,7 +99,9 @@ const tags = {
     CLI_MGC_OBJECTS_DELETE: "mgc object-storage objects delete",
     CLI_MGC_BUCKETS_DELETE: "mgc object-storage buckets delete",
     CLI_RCLONE_LIST: "rclone lsd",
+    CLI_RCLONE_COPYTO: "rclone copyto",
     CLI_RCLONE_COPY: "rclone copy",
+    CLI_RCLONE_DELETE: "rclone delete",
     CLI_RCLONE_PURGE: "rclone purge",
     CLI_RCLONE_CAT: "rclone cat",
     HTTP_PUT: "http put",

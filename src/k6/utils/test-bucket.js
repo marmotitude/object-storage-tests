@@ -3,7 +3,11 @@ import { crypto } from "k6/experimental/webcrypto"
 import { aws } from "./clis.js"
 import tags from "./tags.js"
 
-export function bucketSetup(s3Config) {
+export function bucketSetup(s3Config, testBucketName) {
+  if (testBucketName) {
+    console.log("a test bucker was passed, skip bucket creation")
+    return {bucketName: testBucketName, s3Config}
+  }
   const bucketName = `test-${crypto.randomUUID()}`
   const locationConstraint = s3Config.region === 'us-east-1' ?  [] :
     ["--create-bucket-configuration", `LocationConstraint=${s3Config.region}`]
@@ -28,7 +32,11 @@ export function bucketSetup(s3Config) {
   return {bucketName, s3Config}
 }
 
-export function bucketTeardown({s3Config, bucketName}) {
+export function bucketTeardown({s3Config, bucketName}, testBucketName) {
+  if (testBucketName) {
+    console.log("a test bucker was passed, skip bucket purge")
+    return
+  }
   // delete bucket used by the tests
   const purgeBucketResult = aws(
     s3Config,
