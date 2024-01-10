@@ -40,6 +40,11 @@ import {
   setup as awsCliCreateBucketSetup,
   teardown as awsCliCreateBucketTeardown,
 } from "./aws-cli-create-bucket.js";
+import {
+  default as deleteObjectsTest,
+  setup as deleteObjectsSetup,
+  teardown as deleteObjectsTeardown,
+} from "./delete-objects.js";
 
 // init stage
 // XXX: due to k6 this is the aggregated copy/paste of each init stage
@@ -49,6 +54,7 @@ const s3Config = config.remotes[__ENV.AWS_CLI_PROFILE].s3
 const swiftConfig = config.remotes[__ENV.AWS_CLI_PROFILE].swift
 const mgcConfig = config.remotes[__ENV.AWS_CLI_PROFILE].mgc
 const s3 = makeS3Client(s3Config);
+const bucketName = __ENV.TEST_BUCKET
 const testFileName = "LICENSE"
 const testFile = open(`../../${testFileName}`, "r");
 
@@ -78,6 +84,9 @@ export function setup() {
   });
   describe("Setup create bucket duplicate test", (_t) => {
     setupData.awsCliCreateBucketData = awsCliCreateBucketSetup();
+  });
+  describe("Setup delete objects test", (_t) => {
+    setupData.awsCliDeleteObjectsData = deleteObjectsSetup();
   });
   return setupData;
 }
@@ -115,6 +124,9 @@ export default function ({
   describe("Run create bucket duplicate test", (_t) => {
     awsCliCreateBucketTest(awsCliCreateBucketData);
   });
+  describe("Run delete objects test", (_t) => {
+    deleteObjectsTest(awsCliDeleteObjectsData);
+  });
 }
 
 export function teardown({
@@ -147,5 +159,8 @@ export function teardown({
   });
   describe("Teardown aws-cli create bucket duplicate test", (_t) => {
      awsCliCreateBucketTeardown(awsCliCreateBucketData);
+  });
+  describe("Teardown aws-cli delete objects test", (_t) => {
+     deleteObjectsTeardown(awsCliDeleteObjectsData);
   });
 }
