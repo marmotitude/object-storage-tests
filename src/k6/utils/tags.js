@@ -9,6 +9,7 @@ const tags = {
     // objects
     GET_OBJECT_PRESIGNED_V2: "get object (presigned v2)",
 
+
     // multipart objects
     CREATE_MULTIPART_UPLOAD: "start multipart upload",
 
@@ -80,6 +81,9 @@ const tags = {
     CLI_AWS_S3_LS: "aws s3 ls",
     CLI_AWS_S3_CP: "aws s3 cp",
     CLI_AWS_S3_PRESIGN: "aws s3 presign",
+    CLI_AWS_S3API_PUT_BUCKET_VERSIONING: "aws s3api put-bucket-versioning",
+    CLI_AWS_S3API_GET_OBJECT: "aws s3api get-object",
+    CLI_AWS_S3API_LIST_OBJECT_VERSIONS: "aws s3api list-object-versions",
     CLI_AWS_S3API_CREATE_BUCKET: "aws s3api create-bucket",
     CLI_AWS_S3API_PUT_OBJECT: "aws s3api put-object",
     CLI_AWS_S3API_DELETE_OBJECT: "aws s3api delete-object",

@@ -45,6 +45,11 @@ import {
   setup as deleteObjectsSetup,
   teardown as deleteObjectsTeardown,
 } from "./delete-objects.js";
+import {
+  default as awsCliVersionsTest,
+  setup as awsCliVersionsSetup,
+  teardown as awsCliVersionsTeardown,
+} from "./aws-cli-versions.js";
 
 // init stage
 // XXX: due to k6 this is the aggregated copy/paste of each init stage
@@ -88,6 +93,9 @@ export function setup() {
   describe("Setup delete objects test", (_t) => {
     setupData.awsCliDeleteObjectsData = deleteObjectsSetup();
   });
+  describe("Setup versions test", (_t) => {
+    setupData.awsCliVersionsData = awsCliVersionsSetup();
+  });
   return setupData;
 }
 export default function ({
@@ -99,6 +107,8 @@ export default function ({
   mgcData,
   rcloneData,
   awsCliCreateBucketData,
+  awsCliDeleteObjectsData,
+  awsCliVersionsData,
 }) {
   describe("Run k6-jslib-aws buckets test", async (_t) => {
     await k6JsLibBucketsTest(k6JsLibBucketsData);
@@ -127,6 +137,9 @@ export default function ({
   describe("Run delete objects test", (_t) => {
     deleteObjectsTest(awsCliDeleteObjectsData);
   });
+  describe("Run versions test", (_t) => {
+    deleteObjectsTest(awsCliVersionsData);
+  });
 }
 
 export function teardown({
@@ -137,7 +150,9 @@ export function teardown({
   boto3Data,
   mgcData,
   rcloneData,
-  awsCliCreateBucketData
+  awsCliCreateBucketData,
+  awsCliDeleteObjectsData,
+  awsCliVersionsData,
 }) {
   describe("Teardown k6-jslib-aws objects test", (_t) => {
     k6JsLibObjectsTeardown(k6JsLibObjectsData);
@@ -162,5 +177,8 @@ export function teardown({
   });
   describe("Teardown aws-cli delete objects test", (_t) => {
      deleteObjectsTeardown(awsCliDeleteObjectsData);
+  });
+  describe("Teardown aws-cli versions test", (_t) => {
+     deleteObjectsTeardown(awsCliVersionsData);
   });
 }
