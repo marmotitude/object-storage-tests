@@ -7,6 +7,14 @@ import os
 config_file = os.path.join(os.getenv('CONFIG_PATH', '.'), 'config.yaml')
 
 def delete_bucket_contents(s3, bucket_name):
+    versions = s3.list_object_versions(Bucket=bucket_name)
+
+    for version in versions.get('Versions', []):
+        s3.delete_object(Bucket=bucket_name, Key=version['Key'], VersionId=version['VersionId'])
+
+    for version in versions.get('DeleteMarkers', []):
+        s3.delete_object(Bucket=bucket_name, Key=version['Key'], VersionId=version['VersionId'])
+
     objects = s3.list_objects_v2(Bucket=bucket_name)
     if 'Contents' in objects:
         for obj in objects['Contents']:
@@ -20,8 +28,10 @@ def delete_buckets(profile):
             region = data['remotes'][profile]['s3']['region']
         except yaml.YAMLError as exc:
             print(exc)
+    
     session = boto3.Session(profile_name=profile)
     s3 = session.client('s3', endpoint_url=endpoint, region_name=region)
+    
     response = s3.list_buckets()
     for bucket in response['Buckets']:
         if bucket['Name'].startswith('test'):
@@ -33,6 +43,7 @@ def main():
     if len(sys.argv) != 2:
         print("Use: python clean-all-buckets.py <profile>")
         sys.exit(1)
+    
     profile = sys.argv[1]
     delete_buckets(profile)
 
