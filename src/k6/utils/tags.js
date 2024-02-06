@@ -16,8 +16,8 @@ const tags = {
 
     CREATE_BUCKET: "Create Bucket",
     // Transfer Bucket Between Regions
-    // Set Bucket Permission to a Public Bucket
-    // Set Bucket Permission to a Private Bucket
+    SET_PUBLIC_ACL: "Set Bucket Permission to a Public Bucket",
+    SET_PRIVATE_ACL: "Set Bucket Permission to a Private Bucket",
     PURGE_BUCKET: "Force Delete Bucket",
     GET_OBJECT: "Download Object from a Bucket",    
     GET_OBJECT_PUBLIC: "get object (public)",

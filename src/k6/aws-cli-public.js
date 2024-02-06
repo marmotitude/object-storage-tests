@@ -64,11 +64,12 @@ export function publicGetWithProject({bucketName}) {
   // generate public (GET) url using AWS-CLI
   checkTags = {
     tool: tags.tools.CLI_AWS,
+    feature: tags.features.SET_PUBLIC_ACL,
     command: tags.commands.CLI_AWS_S3API_PUT_BUCKET_ACL,
   }
   const response = aws(s3Config, "s3api", [ "put-bucket-acl", "--bucket", bucketName, "--acl", "public-read" ])
   check(response, {
-    [`${checkTags.command} put bucket acl empty response`]: r => r.includes("")
+    [`${checkTags.command} put bucket acl public-read empty response`]: r => r.includes("")
   }, checkTags)
 
   // download testFile using Public url
@@ -85,5 +86,32 @@ export function publicGetWithProject({bucketName}) {
   console.log(`GET response status =${res.status}`)
   check(res.status, {
     [`${checkTags.command} response have status 200`]: s => s === 200
+  }, checkTags)
+
+    // set bucket for private
+  checkTags = {
+    tool: tags.tools.CLI_AWS,
+    feature: tags.features.SET_PRIVATE_ACL,
+    command: tags.commands.CLI_AWS_S3API_PUT_BUCKET_ACL,
+  }
+  const response_private = aws(s3Config, "s3api", [ "put-bucket-acl", "--bucket", bucketName, "--acl", "private" ])
+  check(response_private, {
+    [`${checkTags.command} put bucket acl private empty response`]: r => r.includes("")
+  }, checkTags)
+
+  // download testFile using Public url in private bucket
+  checkTags = {
+    tool: tags.tools.HTTP,
+    feature: tags.features.GET_OBJECT_PRIVATE,
+    command: tags.commands.HTTP_GET,
+  }
+  const url_private = `${endpoint}/${mgcConfig.project}/${bucketName}/${fileName}`
+  //
+  console.log(url)
+  const res_private = http.get(url.trim())
+  console.log(`GET response=${res_private.body}`)
+  console.log(`GET response status =${res_private.status}`)
+  check(res_private.status, {
+    [`${checkTags.command} response have status 401`]: s => s === 401
   }, checkTags)
 }
