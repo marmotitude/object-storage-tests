@@ -181,6 +181,7 @@ _setup: _setup-rclone _setup-aws _setup-mgc
 # run k6 test with env vars
 _k6-run remote testname results_dir *args:
   k6 run src/k6/{{testname}}.js \
+    --address localhost:0 \
     --tag "remote={{remote}}" \
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
