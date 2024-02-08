@@ -37,7 +37,7 @@ done
 chmod -R 755 results
 
 # Schedule for TEST_SUITE=big
-echo "8 7,9,11,14,16,18,22,0 * * * TEST_SUITE=big /app/run_tests.sh" >> /etc/crontabs/root
+echo "03 7,9,11,14,17,18,19,22,0 * * * TEST_SUITE=big /app/run_tests.sh" >> /etc/crontabs/root
 
 # Schedule for TEST_SUITE=small
 echo "*/5 * * * * TEST_SUITE=small /app/run_tests.sh" >> /etc/crontabs/root

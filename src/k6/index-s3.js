@@ -31,6 +31,7 @@ const modules = importModules(fileNames);
 // init stage
 // XXX: due to k6 this is the aggregated copy/paste of each init stage
 // of the individual tests
+const profile = __ENV.AWS_CLI_PROFILE
 const config = yamlParse(open('../../config.yaml'));
 const s3Config = config.remotes[__ENV.AWS_CLI_PROFILE].s3
 const swiftConfig = config.remotes[__ENV.AWS_CLI_PROFILE].swift
