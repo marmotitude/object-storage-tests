@@ -44,3 +44,10 @@ webapp:
     locations:
       "/":
         root: "/app/results"
+
+# specific remotes for specific test groups
+small_set_remotes: "do-nyc3 aws-east-1"
+
+# settings for storing the results in the cloud
+# XXX: add -s3 in the end of the name because the sync is made with rclone
+results_bucket: "aws-east-1-s3:object-storage-tests-results-2024-02"
