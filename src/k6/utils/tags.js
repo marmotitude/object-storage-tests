@@ -16,10 +16,12 @@ const tags = {
 
     CREATE_BUCKET: "Create Bucket",
     // Transfer Bucket Between Regions
-    // Set Bucket Permission to a Public Bucket
-    // Set Bucket Permission to a Private Bucket
+    SET_PUBLIC_ACL: "Set Bucket Permission to a Public Bucket",
+    SET_PRIVATE_ACL: "Set Bucket Permission to a Private Bucket",
     PURGE_BUCKET: "Force Delete Bucket",
-    GET_OBJECT: "Download Object from a Bucket",
+    GET_OBJECT: "Download Object from a Bucket",    
+    GET_OBJECT_PUBLIC: "get object (public)",
+    GET_OBJECT_PRIVATE: "get object (private)",
     PUT_OBJECT: "Upload Object to a Bucket",
     LIST_BUCKET_OBJECTS: "List All Objects in a Bucket",
     //     Upload Object Date
@@ -81,6 +83,7 @@ const tags = {
     CLI_AWS_S3_CP: "aws s3 cp",
     CLI_AWS_S3_PRESIGN: "aws s3 presign",
     CLI_AWS_S3API_CREATE_BUCKET: "aws s3api create-bucket",
+    CLI_AWS_S3API_PUT_BUCKET_ACL: "aws s3api put-bucket-acl",
     CLI_AWS_S3API_PUT_OBJECT: "aws s3api put-object",
     CLI_AWS_S3API_DELETE_OBJECT: "aws s3api delete-object",
     CLI_AWS_S3API_DELETE_OBJECTS: "aws s3api delete-objects",
