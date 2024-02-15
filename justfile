@@ -3,8 +3,10 @@
 date := `date +%Y%m%d-%H%M%S`
 config_file := env_var_or_default("CONFIG_PATH", "./") + "config.yaml"
 results_prefix := "results"
-rclone_conf_exists := path_exists(env_var("HOME") + "/.config/rclone")
-aws_conf_exists := path_exists(env_var("HOME") + "/.aws")
+rclone_conf_path := env_var("HOME") + "/.config/rclone"
+rclone_conf_exists := path_exists(rclone_conf_path)
+aws_conf_path := env_var("HOME") + "/.aws"
+aws_conf_exists := path_exists(aws_conf_path)
 distroboxrc_cm := `dasel -f ~/.distroboxrc \
   -s container_manager -r toml  2>/dev/null || true`
 fallback_cm := if distroboxrc_cm == "" { "podman" } else { distroboxrc_cm }
@@ -17,6 +19,7 @@ k6_iterations := "1"
 
 # OCI
 main_image := "ghcr.io/marmotitude/object-storage-tests:main"
+webapp_image := "ghcr.io/marmotitude/object-storage-tests:webapp"
 devshell_image := "docker.io/fczuardi/object-storage-tests:devshell"
 distrobox_name := "devshell-obj"
 
@@ -128,6 +131,16 @@ build builder=oci_manager:
 build-dev builder=oci_manager:
   {{builder}} build --rm -t {{devshell_image}} -f ./devshell.Dockerfile .
 
+# Build webapp image.
+build-webapp builder=oci_manager:
+  # write ./nginx.conf to be copied by Dockerfile
+  gotpl -f config.yaml src/templates/nginx.conf --output .
+  {{builder}} build --no-cache --rm -t {{webapp_image}} -f ./webapp.Dockerfile .
+  rm ./nginx.conf
+
+# Launch webapp container
+run-webapp:
+  docker run -e CONFIG_YAML_CONTENT="$(cat ./small-config.yaml)" -p 5000:5000 {{webapp_image}}
 
 # Private recipes
 #----------------
@@ -153,9 +166,9 @@ _setup-aws:
   {{ if aws_conf_exists == "false" { "just __setup-aws" } else { "" } }}
 __setup-aws:
   @echo "writing ~/.aws…"
-  @mkdir -p ~/.aws
-  gotpl src/templates/aws/config -f {{config_file}} -o ~/.aws
-  gotpl src/templates/aws/credentials -f {{config_file}} -o ~/.aws
+  @mkdir -p {{aws_conf_path}}
+  gotpl src/templates/aws/config -f {{config_file}} -o {{aws_conf_path}}
+  gotpl src/templates/aws/credentials -f {{config_file}} -o {{aws_conf_path}}
 
 _setup-mgc:
   @echo "writing ~/.config/mgc…"
@@ -168,6 +181,7 @@ _setup: _setup-rclone _setup-aws _setup-mgc
 # run k6 test with env vars
 _k6-run remote testname results_dir *args:
   k6 run src/k6/{{testname}}.js \
+    --address localhost:0 \
     --tag "remote={{remote}}" \
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \

@@ -17,6 +17,10 @@ export function setup(){
     return bucketSetup(rcloneConfig);
 }
 
+export function teardown(){
+  return '';
+}
+
 export default function scenarios (data){
     uploadObject(data)
     uploadMultipartObject(data)
