@@ -1,4 +1,4 @@
-current_remote: "example-mgc"
+# credentials and endpoints for multiple object storage providers
 remotes:
   aws-east-1:
     s3:
@@ -32,3 +32,22 @@ remotes:
       region: us-east-1
       access_key: "test:tester"
       secret_key: "testing"
+
+# TODO: mgc tool supports only one remote / profile, this config will be deprecated in the future
+current_remote: "example-mgc"
+
+# config for a webserver to expose results in a website, see webapp.Dockerfile
+webapp:
+  nginx:
+    listen: 5000
+    server_name: localhost
+    locations:
+      "/":
+        root: "/app/results"
+
+# specific remotes for specific test groups
+small_set_remotes: "do-nyc3 aws-east-1"
+
+# settings for storing the results in the cloud
+# XXX: add -s3 in the end of the name because the sync is made with rclone
+results_bucket: "aws-east-1-s3:object-storage-tests-results-2024-02"
