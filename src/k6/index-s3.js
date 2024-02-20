@@ -12,6 +12,7 @@ const fileNames = [
   "rclone-s3.js",
   "aws-cli-create-bucket.js",
   "delete-objects.js",
+  "aws-cli-s3-acl.js",
 ]
 
 function importModules(fileNames) {

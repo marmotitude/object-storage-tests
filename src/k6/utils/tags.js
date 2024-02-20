@@ -16,8 +16,8 @@ const tags = {
 
     CREATE_BUCKET: "Create Bucket",
     // Transfer Bucket Between Regions
-    // Set Bucket Permission to a Public Bucket
-    // Set Bucket Permission to a Private Bucket
+    // PUT_PUBLIC_ACL: "Set Bucket Permission to a Public Bucket",
+    PUT_PRIVATE_ACL: "Set Bucket Permission to a Private Bucket",
     PURGE_BUCKET: "Force Delete Bucket",
     GET_OBJECT: "Download Object from a Bucket",
     PUT_OBJECT: "Upload Object to a Bucket",
@@ -82,6 +82,10 @@ const tags = {
     CLI_AWS_S3_PRESIGN: "aws s3 presign",
     CLI_AWS_S3API_CREATE_BUCKET: "aws s3api create-bucket",
     CLI_AWS_S3API_PUT_OBJECT: "aws s3api put-object",
+    CLI_AWS_S3API_PUT_OBJECT_ACL: "aws s3api put-object-acl",
+    CLI_AWS_S3API_PUT_BUCKET_ACL: "aws s3api put-bucket-acl",
+    CLI_AWS_S3API_GET_OBJECT: "aws s3api get-object",
+    CLI_AWS_S3API_GET_BUCKET_ACL: "aws s3api get-bucket-acl",
     CLI_AWS_S3API_DELETE_OBJECT: "aws s3api delete-object",
     CLI_AWS_S3API_DELETE_OBJECTS: "aws s3api delete-objects",
     CLI_AWS_S3API_CREATE_MULTIPART: "aws s3api create-multipart-upload",
@@ -90,6 +94,7 @@ const tags = {
     CLI_AWS_S3API_UPLOAD_PART: "aws s3api upload-part",
     CLI_AWS_S3API_UPLOAD_PART_COPY: "aws s3api upload-part-copy",
     CLI_AWS_S3API_LIST_PARTS: "aws s3api list-parts",
+    CLI_AWS_S3API_LIST_OBJECTS_V2: "aws s3api list-objects-v2",
     CLI_AWS_S3API_COMPLETE_MULTIPART: "aws s3api complete-multipart-upload",
     CLI_MGC_BUCKETS_CREATE: "mgc object-storage buckets create",
     CLI_MGC_BUCKETS_LIST: "mgc object-storage buckets list",
