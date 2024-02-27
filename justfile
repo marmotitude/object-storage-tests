@@ -17,6 +17,9 @@ oci_manager := env_var_or_default("DBX_CONTAINER_MANAGER", fallback_cm)
 k6_vus := "1"
 k6_iterations := "1"
 
+# Reads Prometheus RW server URL from config.yaml
+prometheus_rw_url := `dasel -f "./config.yaml" 'prometheus_rw_url'`
+
 # OCI
 main_image := "ghcr.io/marmotitude/object-storage-tests:main"
 webapp_image := "ghcr.io/marmotitude/object-storage-tests:webapp"
@@ -178,15 +181,22 @@ _setup-mgc:
 # setup cli tools
 _setup: _setup-rclone _setup-aws _setup-mgc
 
-# run k6 test with env vars
+# run k6 test with env vars and outputs to Prometheus or JSON
 _k6-run remote testname results_dir *args:
+  #!/usr/bin/env sh
+  output_arg="--out json="{{results_dir}}/k6-{{testname}}.json""
+  if [ -n "{{prometheus_rw_url}}" ]; then
+    echo "prometheus_rw_url is set and not empty"
+    output_arg="--out=experimental-prometheus-rw"
+  fi
+  K6_PROMETHEUS_RW_SERVER_URL="{{prometheus_rw_url}}" \
   k6 run src/k6/{{testname}}.js \
     --address localhost:0 \
     --tag "remote={{remote}}" \
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --env AWS_CLI_PROFILE={{remote}} \
-    --out json="{{results_dir}}/k6-{{testname}}.json" \
+    $output_arg \
     --console-output="{{results_dir}}/k6-{{testname}}.console.log" \
     {{args}} 2>&1 | tee "{{results_dir}}/k6-{{testname}}.log"
 
