@@ -17,8 +17,8 @@ RUN cp linux-amd64/gotpl /app
 # main image
 FROM alpine:3.18.5
 RUN apk update && \
-    apk add coreutils aws-cli rclone \
-            just openssl dasel
+      apk add coreutils aws-cli rclone \
+      just openssl dasel
 COPY --from=k6builder /app/k6 /usr/bin/k6
 COPY --from=gotplbuilder /app/gotpl /usr/bin/gotpl
 
@@ -38,6 +38,7 @@ COPY justfile /app/justfile
 COPY run_tests.sh /app/run_tests.sh
 COPY requirements.txt /app/requirements.txt
 COPY LICENSE /app/LICENSE
+COPY config.yaml /app/config.yaml
 RUN pip install --no-cache-dir --no-dependencies -r requirements.txt
 RUN mkdir /app/config
 ENTRYPOINT ["just", "-f", "/app/justfile"]
