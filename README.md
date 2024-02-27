@@ -1,7 +1,9 @@
 # object-storage-tests
+
 A growing test suite for S3-like object storage implementations.
 
 ## About
+
 This project uses the load tests framework [k6][k6] (extended
 with some extensions) as the basis to execute test scenarios using popular
 open source command line tools like [aws-cli][aws-cli], [rclone][rclone],
@@ -9,6 +11,7 @@ open source command line tools like [aws-cli][aws-cli], [rclone][rclone],
 [k6-jslib-aws][k6-jslib-aws].
 
 ### Roadmap
+
 This is an early-stage project and the main focus is to test proprietary
 object storage providers, like AWS and Digital Ocean. But we would like
 to include open source/self-hosted object storage providers as well,
@@ -43,6 +46,22 @@ and edit it to include your credentials.
 cp example.config.yaml config.yaml
 vim config.yaml #edit with your remotes
 ```
+
+### Configuring Output Formats for Test Results
+
+The output format of the test results can be controlled via the `prometheus_rw_url` variable in the `config.yaml` file. This allows for flexibility in how you wish to view and use your test data.
+
+- **JSON Output (Default)**: If the `prometheus_rw_url` variable is not set or is left empty in the `config.yaml`, the test results will be output in JSON format. This is the default behavior and is suitable for scenarios where JSON formatted data is required for analysis or integration, like in a `webapp` tagged image.
+
+- **Prometheus Metrics Output**: If you set a value for `prometheus_rw_url` in the `config.yaml`, the test results will be output as Prometheus metrics. This is useful for integrating with monitoring systems that are compatible with Prometheus.
+
+Example configuration in `config.yaml`:
+
+```yaml
+prometheus_rw_url: "http://your-prometheus-server:port/api/v1/write"  # Outputs Prometheus metrics
+# prometheus_rw_url: ""                                               # Outputs JSON (default)
+
+
 ### Run tests using a pre-made docker image
 
 **object-storage-tests** is available as three
@@ -53,7 +72,7 @@ requirements.
 interactively and make contributions.
   - tag `webapp` is the same as main with a [webserver exposed on port 5000][webapp.Dockerfile] that
 serves html reports from the `results` folder, this image have a `run_tests.sh` script that updates
-the folder with a new report.
+the folder with a new report. Only works properly when output is JSON.
 
 If you are on a machine with podman installed, you can use `just run <command>` to execute a
 command from within the main test runner image (tag latest). For example:
@@ -61,30 +80,40 @@ command from within the main test runner image (tag latest). For example:
 #### list available commands
 
 ```
+
 just run
+
 ```
 
 #### list available remotes
 ```
+
 just run list-remotes
+
 ```
 
 #### list available test scenarios
 ```
+
 just run list-tests
+
 ```
 
 #### run a single test scenario agains a single remote
 
 ```
+
 just run test aws-east-1 boto3-presigned
+
 ```
 
 The output of the tests are stored in a folder named `results`.
 
 #### run the default s3 scenarions on a single remote
 ```
+
 just run test aws-east-1
+
 ```
 
 ### (Optional) mgc cli
@@ -109,17 +138,23 @@ provided dev-shell, using [distrobox][distrobox]:
 
 First assemble the distrobox with:
 ```
+
 just assemble-dev
+
 ```
 
 Then enter it with
 ```
+
 just dev
+
 ```
 
 To run the tests from inside the devshell use:
 ```
+
 just test <remote name>
+
 ```
 
 The devshell is a container with all the project tools installed, plus some
@@ -168,3 +203,4 @@ Check [Dockerfile][Dockerfile] for an up-to-date complete list.
 [devshell.Dockerfile]:./devshell.Dockerfile
 [Dockerfile]:./Dockerfile
 
+```
