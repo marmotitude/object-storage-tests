@@ -17,8 +17,7 @@ oci_manager := env_var_or_default("DBX_CONTAINER_MANAGER", fallback_cm)
 k6_vus := "1"
 k6_iterations := "1"
 
-# Reads Prometheus RW server URL from config.yaml
-prometheus_rw_url := `dasel -f "./config.yaml" 'prometheus_rw_url'`
+
 
 # OCI
 main_image := "ghcr.io/marmotitude/object-storage-tests:main"
@@ -184,12 +183,13 @@ _setup: _setup-rclone _setup-aws _setup-mgc
 # run k6 test with env vars and outputs to JSON and Prometheus if url is set
 _k6-run remote testname results_dir *args:
   #!/usr/bin/env sh
+  prometheus_rw_url := `dasel -f "{{config_file}}" 'prometheus_rw_url'`
   prometheus_output_arg=""
-  if [ -n "{{prometheus_rw_url}}" ]; then
+  if [ -n "$prometheus_rw_url" ]; then
     echo "prometheus_rw_url is set and not empty"
     prometheus_output_arg="--out=experimental-prometheus-rw"
   fi
-  K6_PROMETHEUS_RW_SERVER_URL="{{prometheus_rw_url}}" \
+  K6_PROMETHEUS_RW_SERVER_URL="$prometheus_rw_url" \
   k6 run src/k6/{{testname}}.js \
     --address localhost:0 \
     --tag "remote={{remote}}" \

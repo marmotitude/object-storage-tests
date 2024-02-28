@@ -38,7 +38,6 @@ COPY justfile /app/justfile
 COPY run_tests.sh /app/run_tests.sh
 COPY requirements.txt /app/requirements.txt
 COPY LICENSE /app/LICENSE
-COPY config.yaml /app/config.yaml
 RUN pip install --no-cache-dir --no-dependencies -r requirements.txt
 RUN mkdir /app/config
 ENTRYPOINT ["just", "-f", "/app/justfile"]
