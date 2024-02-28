@@ -184,10 +184,10 @@ _setup: _setup-rclone _setup-aws _setup-mgc
 # run k6 test with env vars and outputs to Prometheus or JSON
 _k6-run remote testname results_dir *args:
   #!/usr/bin/env sh
-  output_arg="--out json="{{results_dir}}/k6-{{testname}}.json""
+  prometheus_output_arg=""
   if [ -n "{{prometheus_rw_url}}" ]; then
     echo "prometheus_rw_url is set and not empty"
-    output_arg="--out=experimental-prometheus-rw"
+    prometheus_output_arg="--out=experimental-prometheus-rw"
   fi
   K6_PROMETHEUS_RW_SERVER_URL="{{prometheus_rw_url}}" \
   k6 run src/k6/{{testname}}.js \
@@ -196,7 +196,8 @@ _k6-run remote testname results_dir *args:
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --env AWS_CLI_PROFILE={{remote}} \
-    $output_arg \
+    $prometheus_output_arg \
+    --out json="{{results_dir}}/k6-{{testname}}.json"
     --console-output="{{results_dir}}/k6-{{testname}}.console.log" \
     {{args}} 2>&1 | tee "{{results_dir}}/k6-{{testname}}.log"
 
