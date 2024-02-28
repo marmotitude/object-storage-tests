@@ -51,14 +51,14 @@ vim config.yaml #edit with your remotes
 
 The output format of the test results can be controlled via the `prometheus_rw_url` variable in the `config.yaml` file. This allows for flexibility in how you wish to view and use your test data.
 
-- **JSON Output (Default)**: If the `prometheus_rw_url` variable is not set or is left empty in the `config.yaml`, the test results will be output in JSON format. This is the default behavior and is suitable for scenarios where JSON formatted data is required for analysis or integration, like in a `webapp` tagged image.
+- **JSON Output (Default)**: System will always output JSON.
 
-- **Prometheus Metrics Output**: If you set a value for `prometheus_rw_url` in the `config.yaml`, the test results will be output as Prometheus metrics. This is useful for integrating with monitoring systems that are compatible with Prometheus.
+- **Prometheus Metrics Output**: If you set a value for `prometheus_rw_url` in the `config.yaml`, the test results will be also outputed as Prometheus metrics. This is useful for integrating with monitoring systems that are compatible with Prometheus.
 
 Example configuration in `config.yaml`:
 
 ```yaml
-prometheus_rw_url: "http://your-prometheus-server:port/api/v1/write"  # Outputs Prometheus metrics
+prometheus_rw_url: "http://your-prometheus-server:port/api/v1/write"  # Outputs Prometheus metrics and JSON
 # prometheus_rw_url: ""                                               # Outputs JSON (default)
 
 
@@ -72,7 +72,7 @@ requirements.
 interactively and make contributions.
   - tag `webapp` is the same as main with a [webserver exposed on port 5000][webapp.Dockerfile] that
 serves html reports from the `results` folder, this image have a `run_tests.sh` script that updates
-the folder with a new report. Only works properly when output is JSON.
+the folder with a new report.
 
 If you are on a machine with podman installed, you can use `just run <command>` to execute a
 command from within the main test runner image (tag latest). For example:
