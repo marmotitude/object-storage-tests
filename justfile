@@ -183,7 +183,7 @@ _setup: _setup-rclone _setup-aws _setup-mgc
 # run k6 test with env vars and outputs to JSON and Prometheus if url is set
 _k6-run remote testname results_dir *args:
   #!/usr/bin/env sh
-  prometheus_rw_url := `dasel -f "{{config_file}}" 'prometheus_rw_url'`
+  prometheus_rw_url=$(dasel -f "{{config_file}}" 'prometheus_rw_url')
   prometheus_output_arg=""
   if [ -n "$prometheus_rw_url" ]; then
     echo "prometheus_rw_url is set and not empty"
