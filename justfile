@@ -197,7 +197,7 @@ _k6-run remote testname results_dir *args:
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --env AWS_CLI_PROFILE={{remote}} \
     $prometheus_output_arg \
-    --out json="{{results_dir}}/k6-{{testname}}.json"
+    --out json="{{results_dir}}/k6-{{testname}}.json" \
     --console-output="{{results_dir}}/k6-{{testname}}.console.log" \
     {{args}} 2>&1 | tee "{{results_dir}}/k6-{{testname}}.log"
 
