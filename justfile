@@ -181,7 +181,7 @@ _setup-mgc:
 # setup cli tools
 _setup: _setup-rclone _setup-aws _setup-mgc
 
-# run k6 test with env vars and outputs to Prometheus or JSON
+# run k6 test with env vars and outputs to JSON and Prometheus if url is set
 _k6-run remote testname results_dir *args:
   #!/usr/bin/env sh
   prometheus_output_arg=""
