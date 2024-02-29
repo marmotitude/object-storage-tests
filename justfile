@@ -194,7 +194,7 @@ _k6-run remote testname results_dir *args:
   k6 run src/k6/{{testname}}.js \
     --address localhost:0 \
     --tag "remote={{remote}}" \
-    --tag "test_suite_name=$TEST_SUITE" \
+    $(if [ -n "$TEST_SUITE" ]; then echo "--tag \"test_suite_name=$TEST_SUITE\""; fi) \
     --tag "tester_hostname=$tester_hostname" \
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
