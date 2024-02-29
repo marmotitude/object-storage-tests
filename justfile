@@ -183,6 +183,7 @@ _setup: _setup-rclone _setup-aws _setup-mgc
 # run k6 test with env vars and outputs to JSON and Prometheus if url is set
 _k6-run remote testname results_dir *args:
   #!/usr/bin/env sh
+  tester_hostname=$(hostname)
   prometheus_rw_url=$(dasel -f "{{config_file}}" 'prometheus_rw_url')
   prometheus_output_arg=""
   if [ -n "$prometheus_rw_url" ]; then
@@ -193,6 +194,8 @@ _k6-run remote testname results_dir *args:
   k6 run src/k6/{{testname}}.js \
     --address localhost:0 \
     --tag "remote={{remote}}" \
+    --tag "test_suite_name=$TEST_SUITE" \
+    --tag "tester_hostname=$tester_hostname" \
     --quiet \
     --vus={{k6_vus}} --iterations={{k6_iterations}} \
     --env AWS_CLI_PROFILE={{remote}} \
