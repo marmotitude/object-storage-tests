@@ -60,7 +60,7 @@ Example configuration in `config.yaml`:
 ```yaml
 prometheus_rw_url: "http://your-prometheus-server:port/api/v1/write"  # Outputs Prometheus metrics and JSON
 # prometheus_rw_url: ""                                               # Outputs JSON (default)
-
+```
 
 ### Run tests using a pre-made docker image
 
@@ -203,4 +203,3 @@ Check [Dockerfile][Dockerfile] for an up-to-date complete list.
 [devshell.Dockerfile]:./devshell.Dockerfile
 [Dockerfile]:./Dockerfile
 
-```
