@@ -65,20 +65,23 @@ clean-buckets profile: _setup
 test remote test_name folder=date: _setup
   @just _test-k6 {{remote}} {{test_name}} {{folder}}
 
-# Run the same test on multiple remotes
-group-test test_name group_name +remotes: _setup
+# Run on multiple(comma separated) remotes, multiple tests
+group-test group_name remote_names test_names: _setup
   #!/usr/bin/env sh
   results_subdir={{group_name}}/{{date}}
   results_dir={{results_prefix}}/$results_subdir
   echo $results_dir
   mkdir -p $results_dir
-  # TODO: do we want to parallelize?
-  # parallel_processes=2
-  # printf "%s\0" {{remotes}} | xargs -0 -I @ -P $parallel_processes just test @ {{test_name}}
-  for remote in {{remotes}}; do
-    just test $remote {{test_name}} {{date}} || true
+  remotes=$(echo {{remote_names}} | tr ',' ' ')
+  tests=$(echo {{test_names}} | tr ',' ' ')
+  for remote in $remotes; do
+    for test_name in $tests; do
+      echo "STARTING $test_name on $remote"
+      just test $remote $test_name {{date}} || true
+    done
   done
-  echo {{remotes}} > $results_dir/remotes.txt
+  echo $remotes > $results_dir/remotes.txt
+  echo $tests > $results_dir/tests.txt
   just write-reports {{group_name}} {{date}}
 
 # Create html reports based on results from the past minutes
