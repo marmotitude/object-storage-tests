@@ -20,8 +20,7 @@ if [ "$TEST_SUITE" = "big" ]; then
 elif [ "$TEST_SUITE" = "small" ]; then
     # Run tests for small suite
     tests="delete-objects,k6-jslib-buckets"
-    just group-test delete-objects _small "$small_set_remotes" > results/debug_last_test.txt 2>&1
-    just group-test _big "$remotes" "$tests" > results/debug_last_big_test.txt 2>&1
+    just group-test _small "$remotes" "$tests" > results/debug_last_small_test.txt 2>&1
 else
     echo "Unknown TEST_SUITE value: $TEST_SUITE" > results/debug_last_test.txt 2>&1
     exit 1
