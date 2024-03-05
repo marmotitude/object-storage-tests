@@ -5,7 +5,7 @@ const profileName2 = `${__ENV.AWS_CLI_PROFILE}-second`
 
 export function aws({endpoint, region}, subCommand, args=[]){
   console.log(`execute aws`)
-  console.log(`aws ${subCommand} --profile ${profileName} --endpoint ${endpoint} --region ${region} ${args.join(' ')}`)
+  console.log(`aws ${subCommand} --profile ${profileName} --region ${region} ${args.join(' ')}`)
   return exec.command("aws", [
     subCommand,
     "--profile", profileName,
