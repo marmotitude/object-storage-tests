@@ -3,6 +3,8 @@
     [profile {{$remote_name }}]
     endpoint_url = {{ $remote.s3.endpoint }}
     region = {{ $remote.s3.region }}
+    s3 =
+        addressing_style = {{$remote.s3.host}}
   {{end}}
 {{end}}
 
