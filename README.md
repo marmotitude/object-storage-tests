@@ -1,3 +1,7 @@
+# WARNING This project is no longer maintained
+
+see the new one at https://github.com/marmotitude/s3-tester
+
 # object-storage-tests
 
 A growing test suite for S3-like object storage implementations.
